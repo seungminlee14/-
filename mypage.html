@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다츠 게임즈 | 마이페이지</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="js/nav.js" defer></script>
+  <script type="module" src="js/mypage.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">다츠 게임즈</div>
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">홈</a>
+      <a href="login.html" class="nav-link">로그인</a>
+      <a href="signup.html" class="nav-link nav-cta">회원가입</a>
+    </nav>
+  </header>
+
+  <main class="form-page">
+    <section class="form-card">
+      <p class="eyebrow">마이페이지</p>
+      <h1>계정 설정</h1>
+      <p class="lede">닉네임 변경, 비밀번호 변경, 계정 삭제를 여기서 관리할 수 있습니다.</p>
+
+      <div class="settings-group" id="auth-guard">
+        <p class="settings-help">계정 정보를 불러오는 중입니다...</p>
+      </div>
+
+      <div class="settings-group" id="nickname-section" hidden>
+        <div class="settings-header">
+          <div>
+            <p class="eyebrow">닉네임</p>
+            <h2 class="settings-title">닉네임 변경</h2>
+            <p class="settings-help">14일에 한 번만 변경할 수 있어요.</p>
+          </div>
+          <span class="cooldown" id="nickname-cooldown" hidden></span>
+        </div>
+        <form id="nickname-form" class="stacked">
+          <label class="field-label" for="nickname">새 닉네임</label>
+          <input type="text" id="nickname" name="nickname" placeholder="닉네임" autocomplete="nickname" />
+          <button type="submit" class="btn primary">닉네임 변경</button>
+          <p id="nickname-status" class="form-status"></p>
+        </form>
+      </div>
+
+      <div class="settings-group" id="password-section" hidden>
+        <div class="settings-header">
+          <div>
+            <p class="eyebrow">보안</p>
+            <h2 class="settings-title">비밀번호 변경</h2>
+            <p class="settings-help">현재 비밀번호로 확인 후 새 비밀번호를 설정하세요.</p>
+          </div>
+        </div>
+        <form id="password-form" class="stacked">
+          <label class="field-label" for="current-password">현재 비밀번호</label>
+          <input type="password" id="current-password" name="currentPassword" autocomplete="current-password" />
+
+          <label class="field-label" for="new-password">새 비밀번호</label>
+          <input type="password" id="new-password" name="newPassword" autocomplete="new-password" />
+
+          <label class="field-label" for="confirm-password">새 비밀번호 확인</label>
+          <input type="password" id="confirm-password" name="confirmPassword" autocomplete="new-password" />
+
+          <button type="submit" class="btn primary">비밀번호 변경</button>
+          <p id="password-status" class="form-status"></p>
+        </form>
+      </div>
+
+      <div class="settings-group" id="delete-section" hidden>
+        <div class="settings-header danger">
+          <div>
+            <p class="eyebrow">위험 구역</p>
+            <h2 class="settings-title">계정 삭제</h2>
+            <p class="settings-help">계정을 삭제하면 복구할 수 없습니다. 계속하려면 비밀번호를 입력하세요.</p>
+          </div>
+        </div>
+        <form id="delete-form" class="stacked">
+          <label class="field-label" for="delete-password">비밀번호 확인</label>
+          <input type="password" id="delete-password" name="deletePassword" autocomplete="current-password" />
+
+          <button type="submit" class="btn danger">계정 삭제</button>
+          <p id="delete-status" class="form-status"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
