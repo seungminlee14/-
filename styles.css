@@ -145,6 +145,27 @@ main { padding: 32px 24px 72px; }
 .feature h3 { margin: 0 0 8px; }
 .feature p { margin: 0; color: var(--muted); }
 
+.community-callout {
+  margin-top: 36px;
+}
+
+.community-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(120deg, rgba(22, 27, 34, 0.9), rgba(124, 58, 237, 0.08));
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+}
+
+.community-card h2 {
+  margin: 4px 0 8px;
+}
+
 .form-page {
   display: grid;
   place-items: center;
@@ -158,6 +179,13 @@ main { padding: 32px 24px 72px; }
   border-radius: 16px;
   padding: 28px;
   box-shadow: var(--shadow);
+}
+
+.info-card {
+  display: grid;
+  text-align: center;
+  gap: 14px;
+  place-items: center;
 }
 
 .auth-form { display: grid; gap: 14px; margin-top: 16px; }
@@ -185,6 +213,16 @@ main { padding: 32px 24px 72px; }
 
 .form-helper { color: var(--muted); margin: 6px 0 0; }
 .form-status { margin-top: 12px; color: #c7d2fe; min-height: 24px; }
+
+.placeholder-box {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  background: rgba(12, 15, 20, 0.55);
+  font-weight: 700;
+}
 
 .site-footer {
   padding: 18px 24px;
