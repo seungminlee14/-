@@ -41,6 +41,8 @@ if (loginForm) {
         message = '해당 계정은 비활성화되었습니다. 관리자에게 문의해주세요.';
       } else if (error.code === 'auth/user-not-found') {
         message = '등록되지 않은 계정입니다. 회원가입을 진행해주세요.';
+      } else if (error.code === 'auth/unauthorized-domain') {
+        message = '현재 도메인에서는 인증이 허용되지 않습니다. Firebase 콘솔 > 인증 > 허용 도메인에 이 주소를 추가해주세요.';
       }
       showStatus('login', message, 'error');
     }
@@ -84,6 +86,8 @@ if (signupForm) {
         message = '비밀번호는 최소 6자 이상이어야 합니다.';
       } else if (error.code === 'auth/invalid-email') {
         message = '올바른 이메일 형식을 입력해주세요.';
+      } else if (error.code === 'auth/unauthorized-domain') {
+        message = '현재 도메인에서는 인증이 허용되지 않습니다. Firebase 콘솔 > 인증 > 허용 도메인에 이 주소를 추가해주세요.';
       }
       showStatus('signup', message, 'error');
     }
