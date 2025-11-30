@@ -54,19 +54,27 @@ let currentPage = 1;
 let totalPages = 1;
 let currentDetail = null;
 let currentVote = null;
+let hasInitialized = false;
 
-const getDetailNumber = () => {
+const getRouteState = () => {
   const path = window.location.pathname.replace(/\.html$/, "");
   const parts = path.split("/").filter(Boolean);
   if (parts[0] === "community" && parts[1]) {
+    if (parts[1].toLowerCase() === "create") return { create: true };
     const n = Number(parts[1]);
-    return Number.isFinite(n) ? n : null;
+    if (Number.isFinite(n)) return { detail: n };
   }
-  const searchParam = new URLSearchParams(window.location.search).get("post");
-  return searchParam ? Number(searchParam) : null;
+  const params = new URLSearchParams(window.location.search);
+  const searchPost = params.get("post");
+  if (searchPost) return { detail: Number(searchPost) };
+  const searchCreate = params.get("create");
+  if (searchCreate === "true") return { create: true };
+  return {};
 };
 
-const isDetailView = Boolean(getDetailNumber());
+const routeState = getRouteState();
+const isDetailView = Boolean(routeState.detail);
+const isCreateView = Boolean(routeState.create);
 
 const togglePostForm = (show) => {
   if (!postFormSection) return;
@@ -192,10 +200,6 @@ const loadPosts = async () => {
 
 const toggleCreateAccess = (user) => {
   const shouldEnable = Boolean(user);
-  if (openPostFormBtn) {
-    openPostFormBtn.disabled = !shouldEnable;
-    openPostFormBtn.textContent = shouldEnable ? "게시물 생성" : "로그인 후 이용";
-  }
   if (postForm) {
     Array.from(postForm.elements).forEach((el) => {
       if (el instanceof HTMLButtonElement || el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
@@ -221,7 +225,7 @@ const getNextPostNumber = () => {
     transaction.set(counterRef, { postCounter: next }, { merge: true });
     return next;
   });
-};
+}; 
 
 const handleCreatePost = async (event) => {
   event.preventDefault();
@@ -420,22 +424,33 @@ const handleCommentSubmit = async (event) => {
 };
 
 const loadDetail = async () => {
-  const number = getDetailNumber();
+  const number = routeState.detail;
   if (!number) return;
   try {
     const snap = await fetchPostByNumber(number);
-    renderDetail(snap);
-    if (snap) {
-      await loadVoteState(snap.id);
-      await loadComments(snap.id);
+    if (!snap) {
+      alert("게시물이 없습니다");
+      window.location.href = buildListUrl();
+      return;
     }
+    renderDetail(snap);
+    await loadVoteState(snap.id);
+    await loadComments(snap.id);
   } catch (error) {
     console.error(error);
   }
 };
 
+const handleOpenCreate = () => {
+  if (!currentUser) {
+    alert("로그인하여 게시물을 올려보세요!");
+    return;
+  }
+  window.location.href = "/community/Create";
+};
+
 if (openPostFormBtn && closePostFormBtn) {
-  openPostFormBtn.addEventListener("click", () => togglePostForm(true));
+  openPostFormBtn.addEventListener("click", handleOpenCreate);
   closePostFormBtn.addEventListener("click", () => togglePostForm(false));
 }
 
@@ -456,10 +471,21 @@ onAuthStateChanged(auth, (user) => {
   if (isDetailView && currentDetail) {
     loadVoteState(currentDetail.id);
   }
+  if (!hasInitialized) {
+    hasInitialized = true;
+    if (isDetailView) {
+      loadDetail();
+    } else if (isCreateView) {
+      togglePostForm(true);
+      postListSection?.classList.add("hidden");
+      postDetailSection?.classList.add("hidden");
+      if (!currentUser) {
+        alert("로그인하여 게시물을 올려보세요!");
+        window.location.href = "login.html";
+        return;
+      }
+    } else {
+      loadPosts();
+    }
+  }
 });
-
-if (isDetailView) {
-  loadDetail();
-} else {
-  loadPosts();
-}
