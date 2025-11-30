@@ -6,6 +6,9 @@
       "**/.*",
       "**/node_modules/**"
     ],
-    "cleanUrls": true
+    "cleanUrls": true,
+    "rewrites": [
+      { "source": "/community/**", "destination": "/community.html" }
+    ]
   }
 }

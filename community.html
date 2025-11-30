@@ -6,6 +6,7 @@
   <title>다츠 게임즈 | 커뮤니티</title>
   <link rel="stylesheet" href="styles.css" />
   <script type="module" src="js/nav.js" defer></script>
+  <script type="module" src="js/community.js" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -18,12 +19,86 @@
     </nav>
   </header>
 
-  <main class="form-page">
-    <section class="form-card info-card">
-      <p class="eyebrow">커뮤니티</p>
-      <h1>커뮤니티는 준비중입니다</h1>
-      <p class="lede">더 좋은 경험을 제공하기 위해 열심히 준비하고 있어요. 조금만 기다려주세요!</p>
-      <div class="placeholder-box">지금은 준비중입니다</div>
+  <main class="community-page">
+    <section class="hero-card">
+      <div>
+        <p class="eyebrow">커뮤니티</p>
+        <h1>함께 이야기하고, 새로운 소식을 공유하세요</h1>
+        <p class="lede">다른 게이머들과 의견을 나누고, 공략과 소식을 올릴 수 있어요.</p>
+      </div>
+      <div class="hero-actions">
+        <button id="openPostForm" class="primary-btn" type="button">게시물 생성</button>
+        <p class="helper-text">로그인한 사용자만 게시할 수 있습니다.</p>
+      </div>
+    </section>
+
+    <section id="postFormSection" class="form-card post-form hidden">
+      <div class="form-header">
+        <h2>새 게시물 만들기</h2>
+        <button class="link-btn" type="button" id="closePostForm">닫기</button>
+      </div>
+      <form id="postForm" class="stack-form">
+        <label class="input-block">
+          <span>제목</span>
+          <input type="text" id="postTitle" name="title" maxlength="80" required placeholder="제목을 입력하세요" />
+        </label>
+        <label class="input-block">
+          <span>설명</span>
+          <textarea id="postContent" name="content" rows="4" required placeholder="내용을 입력하세요"></textarea>
+        </label>
+        <label class="input-block">
+          <span>사진 (선택)</span>
+          <input type="file" id="postImage" name="image" accept="image/*" />
+        </label>
+        <div class="form-actions">
+          <button class="primary-btn" type="submit">게시</button>
+          <p class="form-status" id="postStatus"></p>
+        </div>
+      </form>
+    </section>
+
+    <section id="postListSection" class="post-list-section">
+      <div class="section-heading">
+        <h2>최신 게시물</h2>
+        <p class="helper-text">페이지당 10개씩 볼 수 있어요.</p>
+      </div>
+      <div id="postsContainer" class="post-list"></div>
+      <div id="pagination" class="pagination"></div>
+    </section>
+
+    <section id="postDetailSection" class="post-detail hidden">
+      <div class="section-heading">
+        <button id="backToList" class="link-btn" type="button">← 목록으로</button>
+      </div>
+      <article class="post-detail-card">
+        <header class="post-detail-header">
+          <div>
+            <p class="eyebrow" id="detailMeta"></p>
+            <h2 id="detailTitle"></h2>
+          </div>
+          <div class="vote-group">
+            <button class="chip" id="likeButton" type="button">👍 <span id="likeCount">0</span></button>
+            <button class="chip" id="dislikeButton" type="button">👎 <span id="dislikeCount">0</span></button>
+          </div>
+        </header>
+        <p id="detailContent" class="detail-body"></p>
+        <img id="detailImage" class="detail-image hidden" alt="게시물 이미지" />
+      </article>
+
+      <section class="comments-section">
+        <div class="section-heading">
+          <h3>댓글</h3>
+          <p class="helper-text">로그인한 사용자만 댓글을 남길 수 있습니다.</p>
+        </div>
+        <form id="commentForm" class="comment-form">
+          <textarea id="commentInput" rows="3" placeholder="댓글을 입력하세요"></textarea>
+          <div class="form-actions">
+            <button class="primary-btn" type="submit">댓글 달기</button>
+            <p class="form-status" id="commentStatus"></p>
+          </div>
+        </form>
+        <div id="commentsContainer" class="comment-list"></div>
+      </section>
     </section>
   </main>
 </body>
