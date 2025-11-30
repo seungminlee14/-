@@ -8,10 +8,10 @@ if (navLinks) {
   const renderLoggedIn = (user) => {
     const displayName = user?.displayName || user?.email || '사용자';
     navLinks.innerHTML = `
-      <a href="index.html" class="nav-link">홈</a>
-      <a href="community.html" class="nav-link">커뮤니티</a>
+      <a href="/" class="nav-link">홈</a>
+      <a href="/community" class="nav-link">커뮤니티</a>
       <span class="nav-greeting">안녕하세요 ${displayName} 님</span>
-      <a href="mypage.html" class="nav-link nav-cta">마이페이지</a>
+      <a href="/mypage" class="nav-link nav-cta">마이페이지</a>
     `;
   };
 

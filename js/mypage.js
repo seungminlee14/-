@@ -153,7 +153,7 @@ const handleDeleteSubmit = (user) => {
       await reauthenticateWithCredential(user, credential);
       await deleteUser(user);
       showStatus('delete', '계정이 삭제되었습니다. 이용해주셔서 감사합니다.', 'success');
-      setTimeout(() => (window.location.href = 'index.html'), 1200);
+      setTimeout(() => (window.location.href = '/'), 1200);
     } catch (error) {
       let message = '계정 삭제에 실패했습니다. 다시 시도해주세요.';
       if (error.code === 'auth/wrong-password') {
@@ -170,7 +170,7 @@ onAuthStateChanged(auth, (user) => {
   if (!guard) return;
   if (!user) {
     guard.innerHTML = '<p class="settings-help">로그인 후 이용 가능합니다. 로그인 페이지로 이동합니다...</p>';
-    setTimeout(() => (window.location.href = 'login.html'), 700);
+    setTimeout(() => (window.location.href = '/login'), 700);
     return;
   }
 

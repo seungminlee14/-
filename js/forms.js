@@ -32,7 +32,7 @@ if (loginForm) {
     try {
       await signInWithEmailAndPassword(auth, username, password);
       showStatus('login', '로그인에 성공했습니다! 곧 메인 화면으로 이동합니다.', 'success');
-      setTimeout(() => (window.location.href = 'index.html'), 800);
+      setTimeout(() => (window.location.href = '/'), 800);
     } catch (error) {
       let message = '로그인에 실패했습니다. 입력값을 다시 확인해주세요.';
       if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
@@ -77,7 +77,7 @@ if (signupForm) {
         await updateProfile(credentials.user, { displayName: nickname });
       }
       showStatus('signup', '회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.', 'success');
-      setTimeout(() => (window.location.href = 'login.html'), 800);
+      setTimeout(() => (window.location.href = '/login'), 800);
     } catch (error) {
       let message = '회원가입에 실패했습니다. 정보를 다시 확인해주세요.';
       if (error.code === 'auth/email-already-in-use') {

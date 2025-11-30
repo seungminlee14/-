@@ -6,7 +6,6 @@ import {
   query,
   orderBy,
   limit,
-  offset,
   getDocs,
   getCountFromServer,
   where,
@@ -16,6 +15,7 @@ import {
   getDoc,
   updateDoc,
   increment,
+  startAfter,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import { auth, firebaseApp } from "./firebase.js";
@@ -188,7 +188,16 @@ const loadPosts = async () => {
   try {
     await loadCounts();
     const skip = (currentPage - 1) * PAGE_SIZE;
-    const postsQuery = query(postsRef, orderBy("number", "desc"), offset(skip), limit(PAGE_SIZE));
+    let postsQuery = query(postsRef, orderBy("number", "desc"), limit(PAGE_SIZE));
+
+    if (skip > 0) {
+      const cursorSnapshot = await getDocs(query(postsRef, orderBy("number", "desc"), limit(skip)));
+      const lastDoc = cursorSnapshot.docs[cursorSnapshot.docs.length - 1];
+      if (lastDoc) {
+        postsQuery = query(postsRef, orderBy("number", "desc"), startAfter(lastDoc), limit(PAGE_SIZE));
+      }
+    }
+
     const snapshot = await getDocs(postsQuery);
     renderPosts(snapshot.docs, skip);
     renderPagination();
@@ -481,7 +490,7 @@ onAuthStateChanged(auth, (user) => {
       postDetailSection?.classList.add("hidden");
       if (!currentUser) {
         alert("로그인하여 게시물을 올려보세요!");
-        window.location.href = "login.html";
+        window.location.href = "/login";
         return;
       }
     } else {
