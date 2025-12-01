@@ -63,10 +63,14 @@ const getRouteState = () => {
     if (parts[1].toLowerCase() === "create") return { create: true };
     const n = Number(parts[1]);
     if (Number.isFinite(n)) return { detail: n };
+    return { invalidDetail: true };
   }
   const params = new URLSearchParams(window.location.search);
   const searchPost = params.get("post");
-  if (searchPost) return { detail: Number(searchPost) };
+  if (searchPost) {
+    const n = Number(searchPost);
+    return Number.isFinite(n) ? { detail: n } : { invalidDetail: true };
+  }
   const searchCreate = params.get("create");
   if (searchCreate === "true") return { create: true };
   return {};
@@ -176,6 +180,11 @@ const buildDetailUrl = (number) => {
 const buildListUrl = () => {
   const path = window.location.pathname;
   return path.endsWith("community.html") ? "community.html" : "/community";
+};
+
+const handleMissingPost = () => {
+  alert("게시물이 없습니다");
+  window.location.href = buildListUrl();
 };
 
 const loadCounts = async () => {
@@ -438,8 +447,7 @@ const loadDetail = async () => {
   try {
     const snap = await fetchPostByNumber(number);
     if (!snap) {
-      alert("게시물이 없습니다");
-      window.location.href = buildListUrl();
+      handleMissingPost();
       return;
     }
     renderDetail(snap);
@@ -482,6 +490,10 @@ onAuthStateChanged(auth, (user) => {
   }
   if (!hasInitialized) {
     hasInitialized = true;
+    if (routeState.invalidDetail) {
+      handleMissingPost();
+      return;
+    }
     if (isDetailView) {
       loadDetail();
     } else if (isCreateView) {
