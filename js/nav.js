@@ -1,0 +1,34 @@
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { auth } from "./firebase.js";
+import { isAdminEmail } from "./access.js";
+
+const navLinks = document.querySelector('.nav-links');
+if (navLinks) {
+  const loggedOutMarkup = navLinks.innerHTML;
+
+  const renderLoggedIn = (user) => {
+    const displayName = user?.displayName || user?.email || '사용자';
+    const adminLink = isAdminEmail(user?.email)
+      ? '<a href="/admin" class="nav-link">관리자</a>'
+      : '';
+    navLinks.innerHTML = `
+      <a href="/" class="nav-link">홈</a>
+      <a href="/community" class="nav-link">커뮤니티</a>
+      <span class="nav-greeting">안녕하세요 ${displayName} 님</span>
+      ${adminLink}
+      <a href="/mypage" class="nav-link nav-cta">마이페이지</a>
+    `;
+  };
+
+  const renderLoggedOut = () => {
+    navLinks.innerHTML = loggedOutMarkup;
+  };
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      renderLoggedIn(user);
+    } else {
+      renderLoggedOut();
+    }
+  });
+}
