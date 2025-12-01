@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다츠 게임즈 | 이용 정지</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script type="module" src="/js/ban-guard.js" defer></script>
+  <script type="module" src="/js/nav.js" defer></script>
+</head>
+<body class="banned-page">
+  <header class="site-header">
+    <div class="logo">다츠 게임즈</div>
+    <nav class="nav-links">
+      <a href="/" class="nav-link">홈</a>
+      <a href="/community" class="nav-link">커뮤니티</a>
+      <a href="/login" class="nav-link">로그인</a>
+      <a href="/signup" class="nav-link nav-cta">회원가입</a>
+    </nav>
+  </header>
+
+  <main class="form-page">
+    <section class="form-card">
+      <p class="eyebrow">접근 제한</p>
+      <h1>당신의 계정은 현재 사용이 불가합니다.</h1>
+      <p class="lede">사유: <span id="banReason">확인 중...</span></p>
+      <p id="banUntil" class="settings-help" hidden></p>
+      <p class="settings-help">문의가 필요하면 관리자에게 연락하세요.</p>
+    </section>
+  </main>
+</body>
+</html>

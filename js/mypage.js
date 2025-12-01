@@ -7,6 +7,7 @@ import {
   updateProfile,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { auth } from "./firebase.js";
+import { isOwnerEmail } from "./access.js";
 
 const statusEl = (id) => document.querySelector(`#${id}-status`);
 
@@ -139,6 +140,11 @@ const handleDeleteSubmit = (user) => {
 
     if (!password) {
       showStatus('delete', '비밀번호를 입력해주세요.', 'error');
+      return;
+    }
+
+    if (isOwnerEmail(user.email)) {
+      showStatus('delete', '소유자 계정은 삭제할 수 없습니다.', 'error');
       return;
     }
 
