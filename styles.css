@@ -570,3 +570,31 @@ main { padding: 32px 24px 72px; }
   text-align: center;
   color: var(--muted);
 }
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.admin-panel {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  background: #f9fafb;
+}
+
+.admin-panel h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+}
+
+.admin-panel .auth-form {
+  margin-top: 0.5rem;
+}
+
+.banned-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at 10% 20%, #fef3c7, #fef9c3 45%, #ffffff 70%);
+}
