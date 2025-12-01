@@ -3,6 +3,7 @@ import {
   deleteUser,
   onAuthStateChanged,
   reauthenticateWithCredential,
+  signOut,
   updatePassword,
   updateProfile,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -21,6 +22,7 @@ const showStatus = (id, message, tone = "info") => {
 const nicknameForm = document.querySelector('#nickname-form');
 const passwordForm = document.querySelector('#password-form');
 const deleteForm = document.querySelector('#delete-form');
+const logoutButton = document.querySelector('#logout-button');
 const nicknameInput = document.querySelector('#nickname');
 const nicknameCooldown = document.querySelector('#nickname-cooldown');
 const guard = document.querySelector('#auth-guard');
@@ -36,6 +38,8 @@ const updateNavGreeting = (displayName) => {
     greeting.textContent = `안녕하세요 ${displayName} 님`;
   }
 };
+
+let signOutRequested = false;
 
 const setCooldownText = (timestamp) => {
   if (!nicknameCooldown || !timestamp) return;
@@ -172,11 +176,33 @@ const handleDeleteSubmit = (user) => {
   });
 };
 
+const handleLogout = () => {
+  if (!logoutButton) return;
+
+  logoutButton.addEventListener('click', async () => {
+    signOutRequested = true;
+    showStatus('logout', '로그아웃 중입니다...');
+    try {
+      await signOut(auth);
+      showStatus('logout', '로그아웃되었습니다. 잠시 후 홈으로 이동합니다.', 'success');
+      setTimeout(() => (window.location.href = '/'), 800);
+    } catch (error) {
+      signOutRequested = false;
+      showStatus('logout', '로그아웃에 실패했습니다. 다시 시도해주세요.', 'error');
+    }
+  });
+};
+
 onAuthStateChanged(auth, (user) => {
   if (!guard) return;
   if (!user) {
-    guard.innerHTML = '<p class="settings-help">로그인 후 이용 가능합니다. 로그인 페이지로 이동합니다...</p>';
-    setTimeout(() => (window.location.href = '/login'), 700);
+    if (signOutRequested) {
+      guard.innerHTML = '<p class="settings-help">로그아웃 완료. 홈으로 이동합니다...</p>';
+      setTimeout(() => (window.location.href = '/'), 400);
+    } else {
+      guard.innerHTML = '<p class="settings-help">로그인 후 이용 가능합니다. 로그인 페이지로 이동합니다...</p>';
+      setTimeout(() => (window.location.href = '/login'), 700);
+    }
     return;
   }
 
@@ -184,11 +210,13 @@ onAuthStateChanged(auth, (user) => {
   document.querySelector('#nickname-section')?.removeAttribute('hidden');
   document.querySelector('#password-section')?.removeAttribute('hidden');
   document.querySelector('#delete-section')?.removeAttribute('hidden');
+  document.querySelector('#logout-section')?.removeAttribute('hidden');
 
   initNickname(user);
   handleNicknameSubmit(user);
   handlePasswordSubmit(user);
   handleDeleteSubmit(user);
+  handleLogout();
 
   const lastChanged = localStorage.getItem(getCooldownKey(user.uid));
   if (lastChanged) {

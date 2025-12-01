@@ -10,7 +10,14 @@ import {
   where,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { auth, firebaseApp } from "./firebase.js";
-import { isAdminEmail, isOwnerEmail, saveBan } from "./access.js";
+import {
+  isAdminEmail,
+  isOwnerEmail,
+  saveBan,
+  listActiveBans,
+  fetchBanLogs,
+  clearBan,
+} from "./access.js";
 
 const db = getFirestore(firebaseApp);
 const postsRef = collection(db, "posts");
@@ -21,6 +28,12 @@ const deleteForm = document.getElementById("deletePostForm");
 const deleteStatus = document.getElementById("deletePostStatus");
 const banForm = document.getElementById("banForm");
 const banStatus = document.getElementById("banStatus");
+const banList = document.getElementById("banList");
+const banListStatus = document.getElementById("banListStatus");
+const refreshBansButton = document.getElementById("refreshBans");
+const banHistoryList = document.getElementById("banHistory");
+const banHistoryStatus = document.getElementById("banHistoryStatus");
+const refreshHistoryButton = document.getElementById("refreshBanHistory");
 
 const setStatus = (el, message, tone = "") => {
   if (!el) return;
@@ -112,11 +125,124 @@ const handleBan = (adminEmail) => {
       await saveBan({ email, reason, untilDate, createdBy: adminEmail });
       setStatus(banStatus, `${email} 계정이 정지되었습니다.`, "success");
       banForm.reset();
+      await loadBans();
+      await loadBanHistory();
     } catch (error) {
       console.error(error);
       setStatus(banStatus, "정지 설정에 실패했습니다. 다시 시도해주세요.", "error");
     }
   });
+};
+
+const formatDate = (date) =>
+  date?.toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+const formatUntil = (ban) => (ban.untilDate ? `${formatDate(ban.untilDate)}까지` : "무기한");
+
+const renderBanList = (bans) => {
+  if (!banList) return;
+  banList.innerHTML = "";
+
+  if (!bans.length) {
+    banList.innerHTML = '<li class="empty-state">현재 정지된 계정이 없습니다.</li>';
+    return;
+  }
+
+  bans.forEach((ban) => {
+    const item = document.createElement("li");
+    item.className = "admin-list-item";
+    item.innerHTML = `
+      <div>
+        <div class="admin-list-title">${ban.id}</div>
+        <p class="admin-list-meta">${ban.reason || "관리자에 의해 차단되었습니다."}</p>
+        <p class="admin-list-meta">${formatUntil(ban)}</p>
+      </div>
+      <div class="admin-list-actions">
+        <button class="button ghost" data-unban="${ban.id}">해제</button>
+      </div>
+    `;
+    banList.appendChild(item);
+  });
+};
+
+const handleUnban = () => {
+  if (!banList) return;
+  banList.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLButtonElement)) return;
+    const email = target.dataset.unban;
+    if (!email) return;
+
+    if (!confirm(`${email} 계정의 정지를 해제하시겠습니까?`)) return;
+    setStatus(banListStatus, "정지를 해제하는 중입니다...");
+    try {
+      await clearBan(email);
+      setStatus(banListStatus, `${email} 정지가 해제되었습니다.`, "success");
+      await loadBans();
+      await loadBanHistory();
+    } catch (error) {
+      console.error(error);
+      setStatus(banListStatus, "해제 중 오류가 발생했습니다. 다시 시도해주세요.", "error");
+    }
+  });
+};
+
+const loadBans = async () => {
+  if (!banListStatus) return;
+  setStatus(banListStatus, "정지 목록을 불러오는 중입니다...");
+  try {
+    const bans = await listActiveBans();
+    renderBanList(bans);
+    setStatus(banListStatus, "");
+  } catch (error) {
+    console.error(error);
+    setStatus(banListStatus, "목록을 불러오지 못했습니다. 다시 시도하세요.", "error");
+  }
+};
+
+const renderBanHistory = (logs) => {
+  if (!banHistoryList) return;
+  banHistoryList.innerHTML = "";
+
+  if (!logs.length) {
+    banHistoryList.innerHTML = '<li class="empty-state">기록이 아직 없습니다.</li>';
+    return;
+  }
+
+  logs.forEach((log) => {
+    const item = document.createElement("li");
+    item.className = "admin-list-item";
+    item.innerHTML = `
+      <div>
+        <div class="admin-list-title">${log.emailLower}</div>
+        <p class="admin-list-meta">${log.action === "unban" ? "해제" : "정지"}${
+      log.untilDate ? ` (${formatUntil(log)})` : ""
+    }</p>
+        <p class="admin-list-meta">${log.reason || "관리자 처리"}</p>
+      </div>
+      <div class="admin-list-actions">
+        <span class="badge subtle">${log.createdAtDate ? formatDate(log.createdAtDate) : "시간 정보 없음"}</span>
+      </div>
+    `;
+    banHistoryList.appendChild(item);
+  });
+};
+
+const loadBanHistory = async () => {
+  if (!banHistoryStatus) return;
+  setStatus(banHistoryStatus, "처벌 기록을 불러오는 중입니다...");
+  try {
+    const logs = await fetchBanLogs();
+    renderBanHistory(logs);
+    setStatus(banHistoryStatus, "");
+  } catch (error) {
+    console.error(error);
+    setStatus(banHistoryStatus, "기록을 불러오지 못했습니다. 다시 시도하세요.", "error");
+  }
 };
 
 const init = () => {
@@ -133,6 +259,11 @@ const init = () => {
     if (adminContent) adminContent.hidden = false;
     handleDelete();
     handleBan(user.email);
+    handleUnban();
+    if (refreshBansButton) refreshBansButton.addEventListener("click", loadBans);
+    if (refreshHistoryButton) refreshHistoryButton.addEventListener("click", loadBanHistory);
+    await loadBans();
+    await loadBanHistory();
   });
 };
 

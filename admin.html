@@ -64,6 +64,30 @@
             <div id="banStatus" class="form-status" role="status" aria-live="polite"></div>
           </form>
         </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <h2>정지된 계정</h2>
+              <p class="settings-help">현재 활성 상태인 정지 목록입니다.</p>
+            </div>
+            <button id="refreshBans" class="button ghost" type="button">새로고침</button>
+          </div>
+          <div id="banListStatus" class="form-status" role="status" aria-live="polite"></div>
+          <ul id="banList" class="admin-list"></ul>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <h2>처벌 기록</h2>
+              <p class="settings-help">정지/해제 내역을 시간순으로 확인하세요.</p>
+            </div>
+            <button id="refreshBanHistory" class="button ghost" type="button">새로고침</button>
+          </div>
+          <div id="banHistoryStatus" class="form-status" role="status" aria-live="polite"></div>
+          <ul id="banHistory" class="admin-list"></ul>
+        </div>
       </div>
     </section>
   </main>
