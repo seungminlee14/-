@@ -10,13 +10,24 @@
 </head>
 <body class="banned-page">
   <header class="site-header">
-    <div class="logo">다츠 게임즈</div>
-    <nav class="nav-links">
-      <a href="/" class="nav-link">홈</a>
-      <a href="/community" class="nav-link">커뮤니티</a>
-      <a href="/login" class="nav-link">로그인</a>
-      <a href="/signup" class="nav-link nav-cta">회원가입</a>
-    </nav>
+    <a href="/" class="logo">다츠 게임즈</a>
+    <div class="nav-right">
+      <nav class="nav-links">
+        <a href="/" class="nav-link">홈</a>
+        <a href="/community" class="nav-link">커뮤니티</a>
+      </nav>
+      <div class="profile-menu">
+        <button class="profile-trigger" type="button" aria-expanded="false">
+          <span class="profile-avatar" aria-hidden="true">미</span>
+          <span class="profile-name">미로그인</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="profile-dropdown" hidden>
+          <a class="profile-action" href="/login">로그인</a>
+          <a class="profile-action" href="/signup">회원가입</a>
+        </div>
+      </div>
+    </div>
   </header>
 
   <main class="form-page">

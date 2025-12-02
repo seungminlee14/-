@@ -26,16 +26,32 @@ const logoutButton = document.querySelector('#logout-button');
 const nicknameInput = document.querySelector('#nickname');
 const nicknameCooldown = document.querySelector('#nickname-cooldown');
 const guard = document.querySelector('#auth-guard');
+const avatarForm = document.querySelector('#avatar-form');
+const photoInput = document.querySelector('#photo-url');
+const avatarPreview = document.querySelector('#avatar-preview');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const COOL_DOWN_DAYS = 14;
 
 const getCooldownKey = (uid) => `lastNicknameChange:${uid}`;
 
-const updateNavGreeting = (displayName) => {
-  const greeting = document.querySelector('.nav-greeting');
-  if (greeting) {
-    greeting.textContent = `안녕하세요 ${displayName} 님`;
+const updateNavProfile = (displayName, photoURL) => {
+  const nameEl = document.querySelector('.profile-name');
+  if (nameEl) {
+    nameEl.textContent = displayName || '프로필';
+  }
+  const navAvatar = document.querySelector('.profile-avatar');
+  if (navAvatar) {
+    const initial = (displayName || '미')[0]?.toUpperCase() || '미';
+    if (photoURL) {
+      navAvatar.style.backgroundImage = `url(${photoURL})`;
+      navAvatar.classList.add('with-photo');
+      navAvatar.textContent = '';
+    } else {
+      navAvatar.style.backgroundImage = '';
+      navAvatar.classList.remove('with-photo');
+      navAvatar.textContent = initial;
+    }
   }
 };
 
@@ -59,6 +75,27 @@ const clearCooldownText = () => {
 const initNickname = (user) => {
   if (!nicknameInput) return;
   nicknameInput.value = user.displayName || '';
+};
+
+const setAvatarPreview = (user) => {
+  if (!avatarPreview) return;
+  const initial = (user.displayName || user.email || '프')[0]?.toUpperCase() || '프';
+  if (user.photoURL) {
+    avatarPreview.style.backgroundImage = `url(${user.photoURL})`;
+    avatarPreview.classList.add('with-photo');
+    avatarPreview.textContent = '';
+  } else {
+    avatarPreview.style.backgroundImage = '';
+    avatarPreview.classList.remove('with-photo');
+    avatarPreview.textContent = initial;
+  }
+};
+
+const initAvatar = (user) => {
+  if (photoInput) {
+    photoInput.value = user.photoURL || '';
+  }
+  setAvatarPreview(user);
 };
 
 const handleNicknameSubmit = (user) => {
@@ -87,11 +124,37 @@ const handleNicknameSubmit = (user) => {
     try {
       await updateProfile(user, { displayName: newNickname });
       localStorage.setItem(getCooldownKey(user.uid), Date.now().toString());
-      updateNavGreeting(newNickname);
+      updateNavProfile(newNickname, user.photoURL);
       clearCooldownText();
       showStatus('nickname', '닉네임이 변경되었습니다.', 'success');
     } catch (error) {
       showStatus('nickname', '닉네임 변경에 실패했습니다. 잠시 후 다시 시도해주세요.', 'error');
+    }
+  });
+};
+
+const handleAvatarSubmit = (user) => {
+  if (!avatarForm) return;
+
+  avatarForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const url = photoInput?.value.trim() || '';
+
+    if (!url) {
+      showStatus('avatar', '프로필 이미지 URL을 입력해주세요.', 'error');
+      return;
+    }
+
+    showStatus('avatar', '프로필 이미지를 업데이트하는 중입니다...');
+
+    try {
+      await updateProfile(user, { photoURL: url });
+      user.photoURL = url;
+      setAvatarPreview(user);
+      updateNavProfile(user.displayName || user.email, url);
+      showStatus('avatar', '프로필 이미지가 업데이트되었습니다.', 'success');
+    } catch (error) {
+      showStatus('avatar', '프로필 이미지 업데이트에 실패했습니다. URL을 확인 후 다시 시도해주세요.', 'error');
     }
   });
 };
@@ -208,12 +271,15 @@ onAuthStateChanged(auth, (user) => {
 
   guard.hidden = true;
   document.querySelector('#nickname-section')?.removeAttribute('hidden');
+  document.querySelector('#avatar-section')?.removeAttribute('hidden');
   document.querySelector('#password-section')?.removeAttribute('hidden');
   document.querySelector('#delete-section')?.removeAttribute('hidden');
   document.querySelector('#logout-section')?.removeAttribute('hidden');
 
   initNickname(user);
+  initAvatar(user);
   handleNicknameSubmit(user);
+  handleAvatarSubmit(user);
   handlePasswordSubmit(user);
   handleDeleteSubmit(user);
   handleLogout();
