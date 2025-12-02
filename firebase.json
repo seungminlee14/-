@@ -10,5 +10,8 @@
     "rewrites": [
       { "source": "/community/**", "destination": "/community.html" }
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }
