@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다츠 게임즈 | 회원가입</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script type="module" src="/js/ban-guard.js" defer></script>
+  <script type="module" src="/js/nav.js" defer></script>
+  <script type="module" src="/js/firebase.js"></script>
+  <script type="module" src="/js/forms.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="logo">다츠 게임즈</a>
+    <div class="nav-right">
+      <nav class="nav-links">
+        <a href="/" class="nav-link">홈</a>
+        <a href="/community" class="nav-link">커뮤니티</a>
+      </nav>
+      <div class="profile-menu">
+        <button class="profile-trigger" type="button" aria-expanded="false">
+          <span class="profile-avatar" aria-hidden="true">미</span>
+          <span class="profile-name">미로그인</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="profile-dropdown" hidden>
+          <a class="profile-action" href="/login">로그인</a>
+          <a class="profile-action" href="/signup">회원가입</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="form-page">
+    <section class="form-card">
+      <p class="eyebrow">회원가입</p>
+      <h1>새 계정을 만들어보세요</h1>
+      <p class="lede">다츠 게임즈 커뮤니티에 참여하고 다양한 게임 소식을 받아보세요.</p>
+      <form id="signup-form" class="auth-form">
+        <label class="form-field">
+          <span>닉네임</span>
+          <input type="text" name="nickname" placeholder="게임 닉네임" required />
+        </label>
+        <label class="form-field">
+          <span>이메일</span>
+          <input type="email" name="email" placeholder="name@example.com" required />
+        </label>
+        <label class="form-field">
+          <span>비밀번호</span>
+          <input type="password" name="password" placeholder="최소 8자" minlength="8" required />
+        </label>
+        <label class="form-field">
+          <span>비밀번호 확인</span>
+          <input type="password" name="passwordConfirm" placeholder="비밀번호를 다시 입력" minlength="8" required />
+        </label>
+        <button class="button primary" type="submit">계정 생성</button>
+        <p class="form-helper">
+          이미 계정이 있나요? <a href="/login">로그인</a>
+        </p>
+      </form>
+      <div id="signup-status" class="form-status" role="status" aria-live="polite"></div>
+    </section>
+  </main>
+</body>
+</html>
