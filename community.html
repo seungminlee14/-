@@ -59,8 +59,11 @@
           <textarea id="postContent" name="content" rows="4" required placeholder="내용을 입력하세요"></textarea>
         </label>
         <label class="input-block">
-          <span>사진 (선택)</span>
-          <input type="file" id="postImage" name="image" accept="image/*" />
+          <span>사진 (현재 업로드 중단)</span>
+          <div class="disabled-upload">
+            <input type="file" id="postImage" name="image" accept="image/*" disabled />
+            <p class="helper-text">이미지 업로드는 일시적으로 지원되지 않습니다.</p>
+          </div>
         </label>
         <div class="form-actions">
           <button class="primary-btn" type="submit">게시</button>

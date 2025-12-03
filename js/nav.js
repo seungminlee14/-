@@ -39,6 +39,7 @@ const closeDropdown = () => {
   if (!dropdown || !trigger) return;
   dropdown.hidden = true;
   trigger.setAttribute('aria-expanded', 'false');
+  profileMenu?.classList.remove('open');
 };
 
 const toggleDropdown = () => {
@@ -46,6 +47,7 @@ const toggleDropdown = () => {
   const willOpen = dropdown.hidden;
   dropdown.hidden = !willOpen;
   trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  profileMenu?.classList.toggle('open', willOpen);
 };
 
 const bindDropdownEvents = () => {

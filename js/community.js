@@ -17,11 +17,9 @@ import {
   increment,
   startAfter,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import { auth, firebaseApp } from "./firebase.js";
 
 const db = getFirestore(firebaseApp);
-const storage = getStorage(firebaseApp);
 const postsRef = collection(db, "posts");
 
 const PAGE_SIZE = 10;
@@ -73,12 +71,14 @@ const getRouteState = () => {
   }
   const searchCreate = params.get("create");
   if (searchCreate === "true") return { create: true };
+  if (params.get("previewCreate") === "true") return { create: true, previewCreate: true };
   return {};
 };
 
 const routeState = getRouteState();
 const isDetailView = Boolean(routeState.detail);
 const isCreateView = Boolean(routeState.create);
+const isPreviewCreate = Boolean(routeState.previewCreate);
 
 const togglePostForm = (show) => {
   if (!postFormSection) return;
@@ -254,7 +254,6 @@ const handleCreatePost = async (event) => {
 
   const title = document.getElementById("postTitle")?.value.trim();
   const content = document.getElementById("postContent")?.value.trim();
-  const imageFile = document.getElementById("postImage")?.files?.[0];
 
   if (!title || !content) {
     setStatus(postStatus, "제목과 내용을 모두 입력하세요.", "error");
@@ -264,13 +263,7 @@ const handleCreatePost = async (event) => {
   setStatus(postStatus, "게시 중입니다...", "");
   try {
     const number = await getNextPostNumber();
-    let imageUrl = "";
-
-    if (imageFile) {
-      const imageRef = ref(storage, `posts/${number}_${imageFile.name}`);
-      await uploadBytes(imageRef, imageFile);
-      imageUrl = await getDownloadURL(imageRef);
-    }
+    const imageUrl = ""; // 이미지 업로드 일시 중단
 
     const authorName = currentUser.displayName || currentUser.email || "사용자";
 
@@ -500,10 +493,13 @@ onAuthStateChanged(auth, (user) => {
       togglePostForm(true);
       postListSection?.classList.add("hidden");
       postDetailSection?.classList.add("hidden");
-      if (!currentUser) {
+      if (!currentUser && !isPreviewCreate) {
         alert("로그인하여 게시물을 올려보세요!");
         window.location.href = "/login";
         return;
+      }
+      if (!currentUser && isPreviewCreate) {
+        setStatus(postStatus, "로그인 후 게시할 수 있습니다. (미리보기)", "info");
       }
     } else {
       loadPosts();

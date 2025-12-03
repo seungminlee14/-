@@ -19,6 +19,8 @@ body {
   min-height: 100vh;
 }
 
+[hidden] { display: none !important; }
+
 a { color: inherit; text-decoration: none; }
 
 .site-header {
@@ -70,7 +72,7 @@ a { color: inherit; text-decoration: none; }
   padding: 8px 12px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: var(--card);
+  background: linear-gradient(135deg, rgba(22, 27, 34, 0.95), rgba(18, 23, 31, 0.9));
   color: var(--text);
   cursor: pointer;
   min-width: 150px;
@@ -102,16 +104,20 @@ a { color: inherit; text-decoration: none; }
   position: absolute;
   right: 0;
   margin-top: 10px;
-  background: var(--card);
+  background: linear-gradient(145deg, rgba(15, 19, 26, 0.98), rgba(12, 15, 20, 0.95));
   border: 1px solid var(--border);
   border-radius: 14px;
   min-width: 180px;
   box-shadow: var(--shadow);
   padding: 8px;
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 6px;
   z-index: 20;
+}
+
+.profile-menu.open .profile-dropdown {
+  display: flex;
 }
 
 .profile-action {
@@ -622,6 +628,18 @@ main { padding: 32px 24px 72px; }
   border-radius: 12px;
   color: var(--text);
   padding: 12px 14px;
+}
+
+.disabled-upload {
+  background: rgba(15, 19, 26, 0.55);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.disabled-upload input[type="file"] {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .form-actions {
