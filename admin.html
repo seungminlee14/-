@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다츠 게임즈 | 관리자</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script type="module" src="/js/ban-guard.js" defer></script>
+  <script type="module" src="/js/nav.js" defer></script>
+  <script type="module" src="/js/admin.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="logo">다츠 게임즈</a>
+    <div class="nav-right">
+      <nav class="nav-links">
+        <a href="/" class="nav-link">홈</a>
+        <a href="/community" class="nav-link">커뮤니티</a>
+      </nav>
+      <div class="notification-menu">
+        <button class="notification-trigger" type="button" aria-expanded="false">
+          <span class="notification-dot" hidden></span>
+          <span class="notification-label">알림</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="notification-dropdown" hidden>
+          <div class="notification-header">
+            <span>알림</span>
+            <button class="notification-mark" type="button" data-action="mark-read">모두 읽음</button>
+          </div>
+          <div class="notification-status"></div>
+          <ul class="notification-list"></ul>
+          <div class="notification-footer">최근 알림 20개만 표시됩니다.</div>
+        </div>
+      </div>
+      <div class="profile-menu">
+        <button class="profile-trigger" type="button" aria-expanded="false">
+          <span class="profile-avatar" aria-hidden="true">미</span>
+          <span class="profile-name">미로그인</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="profile-dropdown" hidden>
+          <a class="profile-action" href="/login">로그인</a>
+          <a class="profile-action" href="/signup">회원가입</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="form-page">
+    <section class="form-card" id="adminGuard">
+      <p class="settings-help">관리자 여부를 확인하는 중입니다...</p>
+    </section>
+
+    <section class="form-card" id="adminContent" hidden>
+      <p class="eyebrow">관리자</p>
+      <h1>커뮤니티 관리</h1>
+      <p class="lede">게시물 관리와 계정 정지를 처리하세요. 소유자 계정은 정지/삭제할 수 없습니다.</p>
+
+      <div class="admin-grid">
+        <div class="admin-panel">
+          <h2>게시물 삭제</h2>
+          <p class="settings-help">번호를 입력하면 댓글과 투표까지 함께 삭제됩니다.</p>
+          <form id="deletePostForm" class="auth-form">
+            <label class="form-field">
+              <span>게시물 번호</span>
+              <input type="number" name="postNumber" min="1" placeholder="예: 12" required />
+            </label>
+            <button class="button danger" type="submit">삭제</button>
+            <div id="deletePostStatus" class="form-status" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <div class="admin-panel">
+          <h2>계정 정지</h2>
+          <p class="settings-help">지정한 기간 동안 접속 시 /banned 페이지로 이동합니다.</p>
+          <form id="banForm" class="auth-form">
+            <label class="form-field">
+              <span>이메일</span>
+              <input type="email" name="targetEmail" placeholder="user@email.com" required />
+            </label>
+            <label class="form-field">
+              <span>정지 기간 (일)</span>
+              <input type="number" name="duration" min="0" placeholder="0 입력 시 무기한" />
+            </label>
+            <label class="form-field">
+              <span>사유</span>
+              <textarea name="reason" rows="3" placeholder="규칙 위반 사유"></textarea>
+            </label>
+            <button class="button primary" type="submit">정지 설정</button>
+            <div id="banStatus" class="form-status" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <div class="admin-panel">
+          <h2>알림 전송</h2>
+          <p class="settings-help">모든 사용자에게 표시될 공지를 전송합니다.</p>
+          <form id="notificationForm" class="auth-form">
+            <label class="form-field">
+              <span>내용</span>
+              <textarea name="message" rows="3" placeholder="예: 점검 안내" required></textarea>
+            </label>
+            <label class="form-field">
+              <span>링크 (선택)</span>
+              <input type="url" name="link" placeholder="https://example.com" />
+            </label>
+            <button class="button primary" type="submit">알림 보내기</button>
+            <div id="notificationStatus" class="form-status" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <h2>정지된 계정</h2>
+              <p class="settings-help">현재 활성 상태인 정지 목록입니다.</p>
+            </div>
+            <button id="refreshBans" class="button ghost" type="button">새로고침</button>
+          </div>
+          <div id="banListStatus" class="form-status" role="status" aria-live="polite"></div>
+          <ul id="banList" class="admin-list"></ul>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
+              <h2>처벌 기록</h2>
+              <p class="settings-help">정지/해제 내역을 시간순으로 확인하세요.</p>
+            </div>
+            <button id="refreshBanHistory" class="button ghost" type="button">새로고침</button>
+          </div>
+          <div id="banHistoryStatus" class="form-status" role="status" aria-live="polite"></div>
+          <ul id="banHistory" class="admin-list"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
