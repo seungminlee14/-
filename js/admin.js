@@ -10,6 +10,7 @@ import {
   where,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { auth, firebaseApp } from "./firebase.js";
+import { sendNotification } from "./notifications.js";
 import {
   isAdminEmail,
   isOwnerEmail,
@@ -34,6 +35,8 @@ const refreshBansButton = document.getElementById("refreshBans");
 const banHistoryList = document.getElementById("banHistory");
 const banHistoryStatus = document.getElementById("banHistoryStatus");
 const refreshHistoryButton = document.getElementById("refreshBanHistory");
+const notificationForm = document.getElementById("notificationForm");
+const notificationStatus = document.getElementById("notificationStatus");
 
 const setStatus = (el, message, tone = "") => {
   if (!el) return;
@@ -191,6 +194,30 @@ const handleUnban = () => {
   });
 };
 
+const handleNotificationSend = (adminEmail) => {
+  if (!notificationForm) return;
+  notificationForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const message = event.target.message.value;
+    const link = event.target.link.value;
+
+    if (!message.trim()) {
+      setStatus(notificationStatus, "알림 내용을 입력하세요.", "error");
+      return;
+    }
+
+    setStatus(notificationStatus, "알림을 전송하는 중입니다...");
+    try {
+      await sendNotification({ message, link, createdBy: adminEmail });
+      setStatus(notificationStatus, "알림이 전송되었습니다.", "success");
+      notificationForm.reset();
+    } catch (error) {
+      console.error(error);
+      setStatus(notificationStatus, "전송 중 오류가 발생했습니다. 다시 시도하세요.", "error");
+    }
+  });
+};
+
 const loadBans = async () => {
   if (!banListStatus) return;
   setStatus(banListStatus, "정지 목록을 불러오는 중입니다...");
@@ -260,6 +287,7 @@ const init = () => {
     handleDelete();
     handleBan(user.email);
     handleUnban();
+    handleNotificationSend(user.email);
     if (refreshBansButton) refreshBansButton.addEventListener("click", loadBans);
     if (refreshHistoryButton) refreshHistoryButton.addEventListener("click", loadBanHistory);
     await loadBans();

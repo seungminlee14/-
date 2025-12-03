@@ -18,6 +18,22 @@
         <a href="/" class="nav-link">홈</a>
         <a href="/community" class="nav-link">커뮤니티</a>
       </nav>
+      <div class="notification-menu">
+        <button class="notification-trigger" type="button" aria-expanded="false">
+          <span class="notification-dot" hidden></span>
+          <span class="notification-label">알림</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="notification-dropdown" hidden>
+          <div class="notification-header">
+            <span>알림</span>
+            <button class="notification-mark" type="button" data-action="mark-read">모두 읽음</button>
+          </div>
+          <div class="notification-status"></div>
+          <ul class="notification-list"></ul>
+          <div class="notification-footer">최근 알림 20개만 표시됩니다.</div>
+        </div>
+      </div>
       <div class="profile-menu">
         <button class="profile-trigger" type="button" aria-expanded="false">
           <span class="profile-avatar" aria-hidden="true">미</span>
