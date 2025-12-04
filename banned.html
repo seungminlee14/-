@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다츠 게임즈 | 이용 정지</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script type="module" src="/js/ban-guard.js" defer></script>
+  <script type="module" src="/js/nav.js" defer></script>
+</head>
+<body class="banned-page">
+  <header class="site-header">
+    <a href="/" class="logo">다츠 게임즈</a>
+    <div class="nav-right">
+      <nav class="nav-links">
+        <a href="/" class="nav-link">홈</a>
+        <a href="/community" class="nav-link">커뮤니티</a>
+      </nav>
+      <div class="notification-menu">
+        <button class="notification-trigger" type="button" aria-expanded="false" aria-label="알림">
+          <span class="notification-dot" hidden></span>
+          <span class="notification-label" aria-hidden="true">🔔</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="notification-dropdown" hidden>
+          <div class="notification-header">
+            <span aria-hidden="true">🔔</span>
+            <button class="notification-mark" type="button" data-action="mark-read">모두 읽음</button>
+          </div>
+          <div class="notification-status"></div>
+          <ul class="notification-list"></ul>
+          <div class="notification-footer">최근 알림 20개만 표시됩니다.</div>
+        </div>
+      </div>
+      <div class="profile-menu">
+        <button class="profile-trigger" type="button" aria-expanded="false">
+          <span class="profile-avatar" aria-hidden="true">미</span>
+          <span class="profile-name">미로그인</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="profile-dropdown" hidden>
+          <a class="profile-action" href="/login">로그인</a>
+          <a class="profile-action" href="/signup">회원가입</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="form-page">
+    <section class="form-card">
+      <p class="eyebrow">접근 제한</p>
+      <h1>당신의 계정은 현재 사용이 불가합니다.</h1>
+      <p class="lede">사유: <span id="banReason">확인 중...</span></p>
+      <p id="banUntil" class="settings-help" hidden></p>
+      <p class="settings-help">문의가 필요하면 관리자에게 연락하세요.</p>
+    </section>
+  </main>
+</body>
+</html>
