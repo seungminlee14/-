@@ -2,7 +2,13 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/f
 import { auth } from "./firebase.js";
 import { fetchActiveBan } from "./access.js";
 
-const path = window.location.pathname.replace(/\.html$/, "");
+const normalizePath = (pathname) => {
+  const trimmed = pathname.replace(/\.html$/, "");
+  if (trimmed.endsWith("/") && trimmed.length > 1) return trimmed.slice(0, -1);
+  return trimmed;
+};
+
+const path = normalizePath(window.location.pathname);
 const isBannedPage = path === "/banned";
 const isAppealPage = path === "/appeal";
 const reasonEl = document.getElementById("banReason");

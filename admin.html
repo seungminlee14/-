@@ -119,6 +119,18 @@
         <div class="admin-panel">
           <div class="panel-header">
             <div>
+              <h2>경고/주의 누적 현황</h2>
+              <p class="settings-help">사용자별 경고 개수와 주의 잔여 횟수를 확인하세요.</p>
+            </div>
+            <button id="refreshWarningCounts" class="button ghost" type="button">새로고침</button>
+          </div>
+          <div id="warningCountsStatus" class="form-status" role="status" aria-live="polite"></div>
+          <ul id="warningCounts" class="admin-list"></ul>
+        </div>
+
+        <div class="admin-panel">
+          <div class="panel-header">
+            <div>
               <h2>이의제기</h2>
               <p class="settings-help">사용자가 올린 이의제기를 확인하고 처리하세요.</p>
             </div>

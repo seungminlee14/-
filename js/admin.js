@@ -18,6 +18,7 @@ import {
   clearBan,
   fetchAppeals,
   resolveAppeal,
+  listPunishmentCounts,
 } from "./access.js";
 
 const db = getFirestore(firebaseApp);
@@ -38,6 +39,9 @@ const notificationStatus = document.getElementById("notificationStatus");
 const appealList = document.getElementById("appealList");
 const appealStatus = document.getElementById("appealStatus");
 const refreshAppealsButton = document.getElementById("refreshAppeals");
+const warningCountsList = document.getElementById("warningCounts");
+const warningCountsStatus = document.getElementById("warningCountsStatus");
+const refreshWarningCountsButton = document.getElementById("refreshWarningCounts");
 
 const setStatus = (el, message, tone = "") => {
   if (!el) return;
@@ -245,6 +249,46 @@ const loadBanHistory = async () => {
   }
 };
 
+const renderWarningCounts = (counts) => {
+  if (!warningCountsList) return;
+  warningCountsList.innerHTML = "";
+
+  if (!counts.length) {
+    warningCountsList.innerHTML = '<li class="empty-state">경고/주의 데이터가 없습니다.</li>';
+    return;
+  }
+
+  counts.forEach((entry) => {
+    const item = document.createElement("li");
+    item.className = "admin-list-item";
+    item.innerHTML = `
+      <div>
+        <div class=\"admin-list-title\">${entry.id}</div>
+        <p class=\"admin-list-meta\">경고 ${entry.warningCount || 0}회 · 주의 잔여 ${entry.cautionRemainder || 0}회</p>
+      </div>
+      <div class=\"admin-list-actions\">
+        <span class=\"badge subtle\">${
+          entry.updatedAtDate ? formatDate(entry.updatedAtDate) : "업데이트 시간 없음"
+        }</span>
+      </div>
+    `;
+    warningCountsList.appendChild(item);
+  });
+};
+
+const loadWarningCounts = async () => {
+  if (!warningCountsStatus) return;
+  setStatus(warningCountsStatus, "경고 누적을 불러오는 중입니다...");
+  try {
+    const counts = await listPunishmentCounts();
+    renderWarningCounts(counts);
+    setStatus(warningCountsStatus, "");
+  } catch (error) {
+    console.error(error);
+    setStatus(warningCountsStatus, "목록을 불러오지 못했습니다. 다시 시도하세요.", "error");
+  }
+};
+
 const renderAppeals = (appeals) => {
   if (!appealList) return;
   appealList.innerHTML = "";
@@ -328,10 +372,13 @@ const init = () => {
     if (refreshBansButton) refreshBansButton.addEventListener("click", loadBans);
     if (refreshHistoryButton) refreshHistoryButton.addEventListener("click", loadBanHistory);
     if (refreshAppealsButton) refreshAppealsButton.addEventListener("click", loadAppeals);
+    if (refreshWarningCountsButton)
+      refreshWarningCountsButton.addEventListener("click", loadWarningCounts);
     handleAppealActions();
     await loadBans();
     await loadBanHistory();
     await loadAppeals();
+    await loadWarningCounts();
   });
 };
 

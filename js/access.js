@@ -107,6 +107,19 @@ export const fetchPunishmentHistory = async () => {
   });
 };
 
+export const listPunishmentCounts = async () => {
+  const q = query(punishmentCountsRef, orderBy("warningCount", "desc"));
+  const snap = await getDocs(q);
+  return snap.docs.map((docSnap) => {
+    const data = docSnap.data();
+    return {
+      id: docSnap.id,
+      ...data,
+      updatedAtDate: data.updatedAt?.toDate ? data.updatedAt.toDate() : null,
+    };
+  });
+};
+
 const recordBanLog = async ({ email, action, reason, untilDate, createdBy }) => {
   const normalized = normalizeEmail(email);
   await addDoc(collection(db, "banLogs"), {
