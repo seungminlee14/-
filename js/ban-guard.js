@@ -2,7 +2,9 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/f
 import { auth } from "./firebase.js";
 import { fetchActiveBan } from "./access.js";
 
-const isBannedPage = window.location.pathname.replace(/\.html$/, "") === "/banned";
+const path = window.location.pathname.replace(/\.html$/, "");
+const isBannedPage = path === "/banned";
+const isAppealPage = path === "/appeal";
 const reasonEl = document.getElementById("banReason");
 const untilEl = document.getElementById("banUntil");
 
@@ -30,7 +32,7 @@ onAuthStateChanged(auth, async (user) => {
         untilEl.textContent = ban.untilDate ? `${formatDate(ban.untilDate)}까지` : "해제 시점 미정";
         untilEl.hidden = false;
       }
-    } else {
+    } else if (!isAppealPage) {
       sessionStorage.setItem("banReason", ban.reason || "관리자에 의해 차단되었습니다.");
       sessionStorage.setItem("banUntil", ban.untilDate ? ban.untilDate.toISOString() : "");
       window.location.href = "/banned";

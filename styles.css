@@ -849,6 +849,91 @@ main { padding: 32px 24px 72px; }
   font-weight: 600;
 }
 
+.step-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.step {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  background: #f9fafb;
+}
+
+.step-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.two-col,
+.three-col {
+  display: grid;
+  gap: 12px;
+}
+
+.two-col {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.three-col {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.notice-box {
+  background: #f3f4f6;
+  border: 1px dashed #d1d5db;
+  border-radius: 10px;
+  padding: 12px;
+  color: #4b5563;
+}
+
+.notice-box.subtle {
+  background: #fff;
+  border-style: solid;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.input-with-button {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.punishment-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  padding: 16px;
+}
+
+.punishment-card {
+  background: #0b1524;
+  color: #e5e7eb;
+  padding: 20px;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.punishment-card h2 { margin: 0; }
+.punishment-reason { margin: 0; font-weight: 600; }
+.punishment-meta { margin: 0; color: #9ca3af; }
+
 .banned-page {
   min-height: 100vh;
   background: radial-gradient(circle at 10% 20%, #fef3c7, #fef9c3 45%, #ffffff 70%);

@@ -42,5 +42,36 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.token.email != null &&
         request.auth.token.email == 'seungminlee14@naver.com';
     }
+
+    // 사용자 디렉터리 (닉네임/프로필 검색용)
+    match /userDirectory/{email} {
+      allow read: if request.auth != null && (request.auth.token.email == email || request.auth.token.email == 'seungminlee14@naver.com');
+      allow write: if request.auth != null && request.auth.token.email != null &&
+        (request.auth.token.email == email || request.auth.token.email == 'seungminlee14@naver.com');
+    }
+
+    // 처벌 카운트
+    match /punishmentCounts/{email} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.email == 'seungminlee14@naver.com';
+    }
+
+    // 처벌 내역
+    match /punishments/{punishmentId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.token.email == 'seungminlee14@naver.com';
+      allow update: if request.auth != null && (
+        request.auth.token.email == 'seungminlee14@naver.com' ||
+        (resource.data.emailLower != null && request.auth.token.email == resource.data.emailLower &&
+          request.resource.data.diff(resource.data).changedKeys().hasOnly(['acknowledged', 'acknowledgedAt']))
+      );
+    }
+
+    // 이의제기
+    match /appeals/{appealId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && request.auth.token.email == 'seungminlee14@naver.com';
+    }
   }
 }

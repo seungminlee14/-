@@ -8,7 +8,7 @@ import {
   updateProfile,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { auth } from "./firebase.js";
-import { isOwnerEmail } from "./access.js";
+import { isOwnerEmail, saveUserDirectoryEntry } from "./access.js";
 
 const statusEl = (id) => document.querySelector(`#${id}-status`);
 
@@ -125,6 +125,7 @@ const handleNicknameSubmit = (user) => {
       await updateProfile(user, { displayName: newNickname });
       localStorage.setItem(getCooldownKey(user.uid), Date.now().toString());
       updateNavProfile(newNickname, user.photoURL);
+      await saveUserDirectoryEntry({ email: user.email, nickname: newNickname, photoURL: user.photoURL });
       clearCooldownText();
       showStatus('nickname', '닉네임이 변경되었습니다.', 'success');
     } catch (error) {
@@ -152,6 +153,7 @@ const handleAvatarSubmit = (user) => {
       user.photoURL = url;
       setAvatarPreview(user);
       updateNavProfile(user.displayName || user.email, url);
+      await saveUserDirectoryEntry({ email: user.email, nickname: user.displayName, photoURL: url });
       showStatus('avatar', '프로필 이미지가 업데이트되었습니다.', 'success');
     } catch (error) {
       showStatus('avatar', '프로필 이미지 업데이트에 실패했습니다. URL을 확인 후 다시 시도해주세요.', 'error');

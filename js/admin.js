@@ -13,11 +13,11 @@ import { auth, firebaseApp } from "./firebase.js";
 import { sendNotification } from "./notifications.js";
 import {
   isAdminEmail,
-  isOwnerEmail,
-  saveBan,
   listActiveBans,
-  fetchBanLogs,
+  fetchPunishmentHistory,
   clearBan,
+  fetchAppeals,
+  resolveAppeal,
 } from "./access.js";
 
 const db = getFirestore(firebaseApp);
@@ -27,8 +27,6 @@ const adminGuard = document.getElementById("adminGuard");
 const adminContent = document.getElementById("adminContent");
 const deleteForm = document.getElementById("deletePostForm");
 const deleteStatus = document.getElementById("deletePostStatus");
-const banForm = document.getElementById("banForm");
-const banStatus = document.getElementById("banStatus");
 const banList = document.getElementById("banList");
 const banListStatus = document.getElementById("banListStatus");
 const refreshBansButton = document.getElementById("refreshBans");
@@ -37,6 +35,9 @@ const banHistoryStatus = document.getElementById("banHistoryStatus");
 const refreshHistoryButton = document.getElementById("refreshBanHistory");
 const notificationForm = document.getElementById("notificationForm");
 const notificationStatus = document.getElementById("notificationStatus");
+const appealList = document.getElementById("appealList");
+const appealStatus = document.getElementById("appealStatus");
+const refreshAppealsButton = document.getElementById("refreshAppeals");
 
 const setStatus = (el, message, tone = "") => {
   if (!el) return;
@@ -95,44 +96,6 @@ const handleDelete = () => {
     } catch (error) {
       console.error(error);
       setStatus(deleteStatus, "삭제 중 오류가 발생했습니다. 다시 시도해주세요.", "error");
-    }
-  });
-};
-
-const handleBan = (adminEmail) => {
-  if (!banForm) return;
-  banForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const email = event.target.targetEmail.value.trim();
-    const days = Number(event.target.duration.value);
-    const reason = event.target.reason.value.trim();
-
-    if (!email) {
-      setStatus(banStatus, "정지할 이메일을 입력하세요.", "error");
-      return;
-    }
-
-    if (isOwnerEmail(email)) {
-      setStatus(banStatus, "소유자 계정은 정지할 수 없습니다.", "error");
-      return;
-    }
-
-    let untilDate = null;
-    if (Number.isFinite(days) && days > 0) {
-      untilDate = new Date();
-      untilDate.setDate(untilDate.getDate() + days);
-    }
-
-    setStatus(banStatus, "정지 정보를 저장하는 중입니다...");
-    try {
-      await saveBan({ email, reason, untilDate, createdBy: adminEmail });
-      setStatus(banStatus, `${email} 계정이 정지되었습니다.`, "success");
-      banForm.reset();
-      await loadBans();
-      await loadBanHistory();
-    } catch (error) {
-      console.error(error);
-      setStatus(banStatus, "정지 설정에 실패했습니다. 다시 시도해주세요.", "error");
     }
   });
 };
@@ -241,12 +204,22 @@ const renderBanHistory = (logs) => {
   }
 
   logs.forEach((log) => {
+    const label =
+      log.type === "warning"
+        ? "경고"
+        : log.type === "caution"
+        ? "주의"
+        : log.type === "suspension"
+        ? "정지"
+        : log.action === "unban"
+        ? "해제"
+        : "처리";
     const item = document.createElement("li");
     item.className = "admin-list-item";
     item.innerHTML = `
       <div>
         <div class="admin-list-title">${log.emailLower}</div>
-        <p class="admin-list-meta">${log.action === "unban" ? "해제" : "정지"}${
+        <p class="admin-list-meta">${label}${log.count ? ` x${log.count}` : ""}${
       log.untilDate ? ` (${formatUntil(log)})` : ""
     }</p>
         <p class="admin-list-meta">${log.reason || "관리자 처리"}</p>
@@ -263,13 +236,78 @@ const loadBanHistory = async () => {
   if (!banHistoryStatus) return;
   setStatus(banHistoryStatus, "처벌 기록을 불러오는 중입니다...");
   try {
-    const logs = await fetchBanLogs();
+    const logs = await fetchPunishmentHistory();
     renderBanHistory(logs);
     setStatus(banHistoryStatus, "");
   } catch (error) {
     console.error(error);
     setStatus(banHistoryStatus, "기록을 불러오지 못했습니다. 다시 시도하세요.", "error");
   }
+};
+
+const renderAppeals = (appeals) => {
+  if (!appealList) return;
+  appealList.innerHTML = "";
+
+  if (!appeals.length) {
+    appealList.innerHTML = '<li class="empty-state">이의제기가 없습니다.</li>';
+    return;
+  }
+
+  appeals.forEach((appeal) => {
+    const item = document.createElement("li");
+    item.className = "admin-list-item";
+    item.innerHTML = `
+      <div>
+        <div class="admin-list-title">${appeal.emailLower}</div>
+        <p class="admin-list-meta">${appeal.message}</p>
+        <p class="admin-list-meta">${appeal.punishmentId ? `관련 처벌: ${appeal.punishmentId}` : "최근 처벌"}</p>
+      </div>
+      <div class="admin-list-actions">
+        <span class="badge subtle">${appeal.createdAt ? formatDate(appeal.createdAt) : ""}</span>
+        ${
+          appeal.status === "open"
+            ? '<button class="button ghost" data-appeal-status="resolved" data-appeal-id="' +
+              appeal.id +
+              '">처리 완료</button>'
+            : '<span class="badge">처리됨</span>'
+        }
+      </div>
+    `;
+    appealList.appendChild(item);
+  });
+};
+
+const loadAppeals = async () => {
+  if (!appealStatus) return;
+  setStatus(appealStatus, "이의제기를 불러오는 중입니다...");
+  try {
+    const appeals = await fetchAppeals();
+    renderAppeals(appeals);
+    setStatus(appealStatus, "");
+  } catch (error) {
+    console.error(error);
+    setStatus(appealStatus, "이의제기를 불러오지 못했습니다.", "error");
+  }
+};
+
+const handleAppealActions = () => {
+  if (!appealList) return;
+  appealList.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLButtonElement)) return;
+    const id = target.dataset.appealId;
+    const status = target.dataset.appealStatus;
+    if (!id || !status) return;
+    setStatus(appealStatus, "이의제기를 업데이트하는 중입니다...");
+    try {
+      await resolveAppeal({ id, status });
+      await loadAppeals();
+    } catch (error) {
+      console.error(error);
+      setStatus(appealStatus, "처리 중 오류가 발생했습니다.", "error");
+    }
+  });
 };
 
 const init = () => {
@@ -285,13 +323,15 @@ const init = () => {
     if (adminGuard) adminGuard.hidden = true;
     if (adminContent) adminContent.hidden = false;
     handleDelete();
-    handleBan(user.email);
     handleUnban();
     handleNotificationSend(user.email);
     if (refreshBansButton) refreshBansButton.addEventListener("click", loadBans);
     if (refreshHistoryButton) refreshHistoryButton.addEventListener("click", loadBanHistory);
+    if (refreshAppealsButton) refreshAppealsButton.addEventListener("click", loadAppeals);
+    handleAppealActions();
     await loadBans();
     await loadBanHistory();
+    await loadAppeals();
   });
 };
 

@@ -8,6 +8,8 @@
     ],
     "cleanUrls": true,
     "rewrites": [
+      { "source": "/admin/punishment", "destination": "/admin-punishment.html" },
+      { "source": "/appeal", "destination": "/appeal.html" },
       { "source": "/community/**", "destination": "/community.html" }
     ]
   },

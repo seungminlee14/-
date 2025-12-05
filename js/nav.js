@@ -1,11 +1,12 @@
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { auth } from "./firebase.js";
-import { isAdminEmail } from "./access.js";
+import { isAdminEmail, saveUserDirectoryEntry } from "./access.js";
 import {
   getLastSeenTimestamp,
   listenToNotifications,
   markNotificationsSeen,
 } from "./notifications.js";
+import { showPendingPunishment } from "./punishments.js";
 
 const navLinks = document.querySelector('.nav-links');
 const notificationMenu = document.querySelector('.notification-menu');
@@ -198,9 +199,17 @@ if (navLinks && profileMenu) {
   bindDropdownEvents();
   bindNotificationActions();
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, async (user) => {
     renderLinks(user);
     renderProfileMenu(user);
+    if (user) {
+      try {
+        await saveUserDirectoryEntry({ email: user.email, nickname: user.displayName, photoURL: user.photoURL });
+        await showPendingPunishment(user.email);
+      } catch (error) {
+        console.error(error);
+      }
+    }
     if (!notificationMenu) return;
 
     if (unsubscribeNotifications) {
