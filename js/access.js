@@ -238,14 +238,14 @@ const createSuspension = async ({ email, reason, days, createdBy }) => {
   return untilDate;
 };
 
-export const applyPunishments = async ({
+export async function applyPunishments({
   email,
   createdBy,
   reason,
   addCautions = 0,
   addWarnings = 0,
   suspensionDays = null,
-}) => {
+}) {
   const normalized = normalizeEmail(email);
   if (!normalized) throw new Error("이메일을 입력하세요.");
   if (!reason || reason.trim().length < 5) throw new Error("사유를 5글자 이상 입력하세요.");
@@ -324,7 +324,7 @@ export const applyPunishments = async ({
 
   await batch.commit();
   return { warningCount: counts.warningCount, cautionRemainder: counts.cautionRemainder, summary };
-};
+}
 
 export const fetchRecentPunishments = async (email, years = 3) => {
   const normalized = normalizeEmail(email);
@@ -332,11 +332,7 @@ export const fetchRecentPunishments = async (email, years = 3) => {
   const cutoff = new Date();
   cutoff.setFullYear(cutoff.getFullYear() - years);
 
-  const q = query(
-    punishmentsRef,
-    where("emailLower", "==", normalized),
-    orderBy("createdAt", "desc")
-  );
+  const q = query(punishmentsRef, where("emailLower", "==", normalized));
   const snap = await getDocs(q);
   return snap.docs
     .map((docSnap) => {
@@ -345,7 +341,13 @@ export const fetchRecentPunishments = async (email, years = 3) => {
       if (createdAt && createdAt < cutoff) return null;
       return { id: docSnap.id, ...data, createdAt, untilDate: formatUntilDate(data.until) };
     })
-    .filter(Boolean);
+    .filter(Boolean)
+    .sort((a, b) => {
+      if (!a.createdAt && !b.createdAt) return 0;
+      if (!a.createdAt) return 1;
+      if (!b.createdAt) return -1;
+      return b.createdAt - a.createdAt;
+    });
 };
 
 export const acknowledgePunishment = async (id) => {
@@ -359,22 +361,32 @@ export const fetchPendingPunishment = async (email) => {
   const q = query(
     punishmentsRef,
     where("emailLower", "==", normalized),
-    where("acknowledged", "==", false),
-    orderBy("createdAt", "desc")
+    where("acknowledged", "==", false)
   );
   const snap = await getDocs(q);
   if (snap.empty) return null;
-  const docSnap = snap.docs[0];
-  const data = docSnap.data();
+
+  const sorted = snap.docs
+    .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+    .sort((a, b) => {
+      const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : null;
+      const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : null;
+      if (!aDate && !bDate) return 0;
+      if (!aDate) return 1;
+      if (!bDate) return -1;
+      return bDate - aDate;
+    });
+
+  const data = sorted[0];
   return {
-    id: docSnap.id,
+    id: data.id,
     ...data,
     createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : null,
     untilDate: formatUntilDate(data.until),
   };
 };
 
-export const createAppeal = async ({ email, punishmentId, message }) => {
+export async function createAppeal({ email, punishmentId, message }) {
   const normalized = normalizeEmail(email);
   if (!normalized) throw new Error("이메일이 필요합니다.");
   if (!message || message.trim().length < 5) throw new Error("이의제기 내용을 5글자 이상 입력하세요.");
@@ -385,7 +397,7 @@ export const createAppeal = async ({ email, punishmentId, message }) => {
     status: "open",
     createdAt: serverTimestamp(),
   });
-};
+}
 
 export const fetchAppeals = async () => {
   const q = query(appealsRef, orderBy("createdAt", "desc"));
