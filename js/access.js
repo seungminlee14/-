@@ -358,16 +358,13 @@ export const acknowledgePunishment = async (id) => {
 export const fetchPendingPunishment = async (email) => {
   const normalized = normalizeEmail(email);
   if (!normalized) return null;
-  const q = query(
-    punishmentsRef,
-    where("emailLower", "==", normalized),
-    where("acknowledged", "==", false)
-  );
+  const q = query(punishmentsRef, where("emailLower", "==", normalized));
   const snap = await getDocs(q);
   if (snap.empty) return null;
 
   const sorted = snap.docs
     .map((docSnap) => ({ id: docSnap.id, ...docSnap.data() }))
+    .filter((doc) => doc.acknowledged === false)
     .sort((a, b) => {
       const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : null;
       const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : null;
@@ -386,15 +383,54 @@ export const fetchPendingPunishment = async (email) => {
   };
 };
 
-export async function createAppeal({ email, punishmentId, message }) {
+export const fetchUserAppeals = async (email) => {
+  const normalized = normalizeEmail(email);
+  if (!normalized) return [];
+  const q = query(appealsRef, where("emailLower", "==", normalized));
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : null,
+        resolvedAt: data.resolvedAt?.toDate ? data.resolvedAt.toDate() : null,
+      };
+    })
+    .sort((a, b) => {
+      if (!a.createdAt && !b.createdAt) return 0;
+      if (!a.createdAt) return 1;
+      if (!b.createdAt) return -1;
+      return b.createdAt - a.createdAt;
+    });
+};
+
+export async function createAppeal({ email, punishmentId, message, punishmentSummary }) {
   const normalized = normalizeEmail(email);
   if (!normalized) throw new Error("이메일이 필요합니다.");
   if (!message || message.trim().length < 5) throw new Error("이의제기 내용을 5글자 이상 입력하세요.");
+
+  const existing = await fetchUserAppeals(email);
+  const cutoff = new Date();
+  cutoff.setFullYear(cutoff.getFullYear() - 3);
+  const relevantAppeals = existing.filter((appeal) => {
+    const createdAt = appeal.createdAt;
+    if (!createdAt || createdAt < cutoff) return false;
+    if (punishmentId && appeal.punishmentId !== punishmentId) return false;
+    return appeal.status !== "rejected";
+  });
+  if (relevantAppeals.length >= 3) {
+    throw new Error("이의제기는 3회까지만 제출할 수 있습니다.");
+  }
+
   await addDoc(appealsRef, {
     emailLower: normalized,
     punishmentId: punishmentId || "",
     message,
     status: "open",
+    statusReason: "",
+    punishmentSummary: punishmentSummary || null,
     createdAt: serverTimestamp(),
   });
 }
@@ -404,11 +440,18 @@ export const fetchAppeals = async () => {
   const snap = await getDocs(q);
   return snap.docs.map((docSnap) => {
     const data = docSnap.data();
-    return { id: docSnap.id, ...data, createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : null };
+    return {
+      id: docSnap.id,
+      ...data,
+      createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : null,
+      resolvedAt: data.resolvedAt?.toDate ? data.resolvedAt.toDate() : null,
+    };
   });
 };
 
-export const resolveAppeal = async ({ id, status }) => {
+export const updateAppealStatus = async ({ id, status, reason }) => {
   if (!id) return;
-  await updateDoc(doc(appealsRef, id), { status, resolvedAt: serverTimestamp() });
+  const trimmed = (reason || "").trim();
+  if (!trimmed || trimmed.length < 5) throw new Error("사유를 5글자 이상 입력하세요.");
+  await updateDoc(doc(appealsRef, id), { status, statusReason: trimmed, resolvedAt: serverTimestamp() });
 };

@@ -1,6 +1,6 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { auth } from "./firebase.js";
-import { createAppeal, fetchRecentPunishments } from "./access.js";
+import { createAppeal, fetchRecentPunishments, fetchUserAppeals } from "./access.js";
 
 const guard = document.getElementById("appealGuard");
 const content = document.getElementById("appealContent");
@@ -10,6 +10,8 @@ const appealForm = document.getElementById("appealForm");
 const appealTarget = document.getElementById("appealTarget");
 const appealMessage = document.getElementById("appealMessage");
 const appealFormStatus = document.getElementById("appealFormStatus");
+const appealHistory = document.getElementById("appealHistory");
+const appealHistoryStatus = document.getElementById("appealHistoryStatus");
 
 const setStatus = (el, message, tone = "") => {
   if (!el) return;
@@ -25,18 +27,22 @@ const formatDate = (date) =>
     day: "numeric",
   });
 
-const renderPunishments = (punishments) => {
-  if (!punishmentList) return;
+let punishments = [];
+
+const renderPunishments = (punishmentsList) => {
+  if (!punishmentList || !appealTarget) return;
   punishmentList.innerHTML = "";
   appealTarget.innerHTML = "";
 
-  if (!punishments.length) {
+  if (!punishmentsList.length) {
     punishmentList.innerHTML = '<li class="empty-state">최근 3년간 받은 처벌이 없습니다.</li>';
     appealTarget.innerHTML = '<option value="">최근 처벌 없음</option>';
     return;
   }
 
-  punishments.forEach((p) => {
+  punishments = punishmentsList;
+
+  punishmentsList.forEach((p) => {
     const item = document.createElement("li");
     item.className = "admin-list-item";
     const typeLabel = p.type === "warning" ? "경고" : p.type === "caution" ? "주의" : "정지";
@@ -70,6 +76,42 @@ const loadPunishments = async (email) => {
   }
 };
 
+const renderAppeals = (appeals) => {
+  if (!appealHistory) return;
+  appealHistory.innerHTML = "";
+
+  if (!appeals.length) {
+    appealHistory.innerHTML = '<li class="empty-state">등록된 이의제기가 없습니다.</li>';
+    return;
+  }
+
+  appeals.forEach((appeal) => {
+    const item = document.createElement("li");
+    item.className = "admin-list-item";
+    const statusLabel =
+      appeal.status === "approved"
+        ? "승인"
+        : appeal.status === "rejected"
+        ? "거부"
+        : appeal.status === "onHold"
+        ? "처리 보류"
+        : "대기";
+    item.innerHTML = `
+      <div>
+        <div class="admin-list-title">${appeal.punishmentSummary?.label || "최근 처벌"}</div>
+        <p class="admin-list-meta">${appeal.message}</p>
+        <p class="admin-list-meta">상태: <span class="badge subtle">${statusLabel}</span>${
+      appeal.statusReason ? ` · ${appeal.statusReason}` : ""
+    }</p>
+      </div>
+      <div class="admin-list-actions">
+        <span class="badge subtle">${appeal.createdAt ? formatDate(appeal.createdAt) : "제출 시간 미확인"}</span>
+      </div>
+    `;
+    appealHistory.appendChild(item);
+  });
+};
+
 const handleAppeal = (email) => {
   if (!appealForm) return;
   appealForm.addEventListener("submit", async (event) => {
@@ -81,14 +123,34 @@ const handleAppeal = (email) => {
     }
     setStatus(appealFormStatus, "제출 중입니다...");
     try {
-      await createAppeal({ email, punishmentId: appealTarget.value, message });
+      const selected = punishments.find((p) => p.id === appealTarget.value);
+      const label = selected
+        ? `${selected.type === "warning" ? "경고" : selected.type === "caution" ? "주의" : "정지"} · ${
+            selected.createdAt ? formatDate(selected.createdAt) : "시간 미확인"
+          }`
+        : "최근 처벌";
+      await createAppeal({ email, punishmentId: appealTarget.value, message, punishmentSummary: { label } });
       setStatus(appealFormStatus, "제출되었습니다. 관리자 검토를 기다려주세요.", "success");
       appealForm.reset();
+      await loadAppealHistory(email);
     } catch (error) {
       console.error(error);
-      setStatus(appealFormStatus, "제출 중 오류가 발생했습니다.", "error");
+      setStatus(appealFormStatus, error.message || "제출 중 오류가 발생했습니다.", "error");
     }
   });
+};
+
+const loadAppealHistory = async (email) => {
+  if (!appealHistoryStatus) return;
+  setStatus(appealHistoryStatus, "이의제기 현황을 불러오는 중입니다...");
+  try {
+    const appeals = await fetchUserAppeals(email);
+    renderAppeals(appeals);
+    setStatus(appealHistoryStatus, "");
+  } catch (error) {
+    console.error(error);
+    setStatus(appealHistoryStatus, "이의제기를 불러오지 못했습니다.", "error");
+  }
 };
 
 const init = () => {
@@ -101,6 +163,7 @@ const init = () => {
     if (guard) guard.hidden = true;
     if (content) content.hidden = false;
     await loadPunishments(user.email);
+    await loadAppealHistory(user.email);
     handleAppeal(user.email);
   });
 };

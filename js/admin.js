@@ -17,7 +17,7 @@ import {
   fetchPunishmentHistory,
   clearBan,
   fetchAppeals,
-  resolveAppeal,
+  updateAppealStatus,
   listPunishmentCounts,
 } from "./access.js";
 
@@ -289,36 +289,60 @@ const loadWarningCounts = async () => {
   }
 };
 
-const renderAppeals = (appeals) => {
-  if (!appealList) return;
-  appealList.innerHTML = "";
+  const formatAppealStatus = (status) => {
+    switch (status) {
+      case "approved":
+        return "승인";
+      case "rejected":
+        return "거부";
+      case "onHold":
+        return "처리 보류";
+      default:
+        return "대기";
+    }
+  };
+
+  const renderAppeals = (appeals) => {
+    if (!appealList) return;
+    appealList.innerHTML = "";
 
   if (!appeals.length) {
     appealList.innerHTML = '<li class="empty-state">이의제기가 없습니다.</li>';
     return;
   }
 
-  appeals.forEach((appeal) => {
-    const item = document.createElement("li");
-    item.className = "admin-list-item";
-    item.innerHTML = `
-      <div>
-        <div class="admin-list-title">${appeal.emailLower}</div>
-        <p class="admin-list-meta">${appeal.message}</p>
-        <p class="admin-list-meta">${appeal.punishmentId ? `관련 처벌: ${appeal.punishmentId}` : "최근 처벌"}</p>
-      </div>
-      <div class="admin-list-actions">
-        <span class="badge subtle">${appeal.createdAt ? formatDate(appeal.createdAt) : ""}</span>
-        ${
-          appeal.status === "open"
-            ? '<button class="button ghost" data-appeal-status="resolved" data-appeal-id="' +
-              appeal.id +
-              '">처리 완료</button>'
-            : '<span class="badge">처리됨</span>'
-        }
-      </div>
-    `;
-    appealList.appendChild(item);
+    appeals.forEach((appeal) => {
+      const item = document.createElement("li");
+      item.className = "admin-list-item";
+      const summaryLabel =
+        appeal.punishmentSummary?.label ||
+        (appeal.punishmentId ? `처벌 ID: ${appeal.punishmentId}` : "최근 처벌");
+      const statusLabel = formatAppealStatus(appeal.status);
+      item.innerHTML = `
+        <div>
+          <div class="admin-list-title">${appeal.emailLower}</div>
+          <p class="admin-list-meta">${appeal.message}</p>
+          <p class="admin-list-meta">${summaryLabel}</p>
+          <p class="admin-list-meta">상태: <span class="badge subtle">${statusLabel}</span>${
+        appeal.statusReason ? ` · ${appeal.statusReason}` : ""
+      }</p>
+        </div>
+        <div class="admin-list-actions">
+          <span class="badge subtle">${appeal.createdAt ? formatDate(appeal.createdAt) : ""}</span>
+          <label class="sr-only" for="appeal-status-${appeal.id}">처리 상태</label>
+          <select id="appeal-status-${appeal.id}" data-appeal-id="${appeal.id}" class="appeal-status-select">
+            <option value="approved" ${appeal.status === "approved" ? "selected" : ""}>승인</option>
+            <option value="rejected" ${appeal.status === "rejected" ? "selected" : ""}>거부</option>
+            <option value="onHold" ${appeal.status === "onHold" ? "selected" : ""}>처리 보류</option>
+            <option value="open" ${appeal.status === "open" ? "selected" : ""}>대기</option>
+          </select>
+          <textarea class="appeal-reason" data-appeal-id="${appeal.id}" rows="2" placeholder="사유 (5글자 이상)" required>${
+        appeal.statusReason || ""
+      }</textarea>
+          <button class="button ghost" data-appeal-action="update" data-appeal-id="${appeal.id}" data-appeal-email="${appeal.emailLower}">업데이트</button>
+        </div>
+      `;
+      appealList.appendChild(item);
   });
 };
 
@@ -335,24 +359,31 @@ const loadAppeals = async () => {
   }
 };
 
-const handleAppealActions = () => {
-  if (!appealList) return;
-  appealList.addEventListener("click", async (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLButtonElement)) return;
-    const id = target.dataset.appealId;
-    const status = target.dataset.appealStatus;
-    if (!id || !status) return;
-    setStatus(appealStatus, "이의제기를 업데이트하는 중입니다...");
-    try {
-      await resolveAppeal({ id, status });
-      await loadAppeals();
-    } catch (error) {
-      console.error(error);
-      setStatus(appealStatus, "처리 중 오류가 발생했습니다.", "error");
-    }
-  });
-};
+  const handleAppealActions = () => {
+    if (!appealList) return;
+    appealList.addEventListener("click", async (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) return;
+      if (target.dataset.appealAction !== "update") return;
+      const id = target.dataset.appealId;
+      if (!id) return;
+      const select = appealList.querySelector(`select[data-appeal-id="${id}"]`);
+      const textarea = appealList.querySelector(`textarea[data-appeal-id="${id}"]`);
+      const status = select?.value || "open";
+      const reason = textarea?.value || "";
+      setStatus(appealStatus, "이의제기를 업데이트하는 중입니다...");
+      try {
+        await updateAppealStatus({ id, status, reason });
+        const statusLabel = status === "approved" ? "승인" : status === "rejected" ? "거부" : status === "onHold" ? "처리 보류" : "대기";
+        const message = `이의제기 ${statusLabel}: ${reason}`;
+        await sendNotification({ message, link: "/appeal" });
+        await loadAppeals();
+      } catch (error) {
+        console.error(error);
+        setStatus(appealStatus, error.message || "처리 중 오류가 발생했습니다.", "error");
+      }
+    });
+  };
 
 const init = () => {
   onAuthStateChanged(auth, async (user) => {
