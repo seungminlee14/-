@@ -455,3 +455,7 @@ export const updateAppealStatus = async ({ id, status, reason }) => {
   if (!trimmed || trimmed.length < 5) throw new Error("사유를 5글자 이상 입력하세요.");
   await updateDoc(doc(appealsRef, id), { status, statusReason: trimmed, resolvedAt: serverTimestamp() });
 };
+
+// Ensure named exports remain discoverable for module consumers that may have cached
+// older builds lacking explicit appeal helpers.
+export { updateAppealStatus };
