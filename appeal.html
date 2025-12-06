@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다츠 게임즈 | 이의제기</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script type="module" src="/js/ban-guard.js" defer></script>
+  <script type="module" src="/js/nav.js" defer></script>
+  <script type="module" src="/js/appeal.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="logo">다츠 게임즈</a>
+    <div class="nav-right">
+      <nav class="nav-links">
+        <a href="/" class="nav-link">홈</a>
+        <a href="/community" class="nav-link">커뮤니티</a>
+      </nav>
+      <div class="notification-menu">
+        <button class="notification-trigger" type="button" aria-expanded="false" aria-label="알림">
+          <span class="notification-dot" hidden></span>
+          <span class="notification-label" aria-hidden="true">🔔</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="notification-dropdown" hidden>
+          <div class="notification-header">
+            <span aria-hidden="true">🔔</span>
+            <button class="notification-mark" type="button" data-action="mark-read">모두 읽음</button>
+          </div>
+          <div class="notification-status"></div>
+          <ul class="notification-list"></ul>
+          <div class="notification-footer">최근 알림 20개만 표시됩니다.</div>
+        </div>
+      </div>
+      <div class="profile-menu">
+        <button class="profile-trigger" type="button" aria-expanded="false">
+          <span class="profile-avatar" aria-hidden="true">미</span>
+          <span class="profile-name">미로그인</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="profile-dropdown" hidden>
+          <a class="profile-action" href="/login">로그인</a>
+          <a class="profile-action" href="/signup">회원가입</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="form-page">
+    <section class="form-card" id="appealGuard">
+      <p class="settings-help">로그인 상태를 확인하는 중입니다...</p>
+    </section>
+
+    <section class="form-card" id="appealContent" hidden>
+      <p class="eyebrow">이의제기</p>
+      <h1>처벌에 대해 설명하세요</h1>
+      <p class="lede">최근 3년간 받은 처벌을 확인하고 이의제기할 수 있습니다.</p>
+
+      <div class="two-col">
+        <div>
+          <h2>최근 처벌</h2>
+          <ul id="punishmentList" class="admin-list compact"></ul>
+          <div id="punishmentStatus" class="form-status" role="status" aria-live="polite"></div>
+        </div>
+        <div>
+          <h2>이의제기 작성</h2>
+          <form id="appealForm" class="auth-form">
+            <label class="form-field">
+              <span>대상 처벌</span>
+              <select id="appealTarget"></select>
+            </label>
+            <label class="form-field">
+              <span>내용 (5글자 이상)</span>
+              <textarea id="appealMessage" rows="4" placeholder="이의제기 내용을 작성하세요" required></textarea>
+            </label>
+            <button class="button primary" type="submit">제출</button>
+            <div id="appealFormStatus" class="form-status" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
