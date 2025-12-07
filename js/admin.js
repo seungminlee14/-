@@ -314,15 +314,14 @@ const loadWarningCounts = async () => {
     appeals.forEach((appeal) => {
       const item = document.createElement("li");
       item.className = "admin-list-item";
-      const summaryLabel =
-        appeal.punishmentSummary?.label ||
-        (appeal.punishmentId ? `처벌 ID: ${appeal.punishmentId}` : "최근 처벌");
+      const summaryLabel = appeal.punishmentSummary?.label || "처벌 내용 없음";
+      const summaryReason = appeal.punishmentSummary?.reason || "";
       const statusLabel = formatAppealStatus(appeal.status);
       item.innerHTML = `
         <div>
           <div class="admin-list-title">${appeal.emailLower}</div>
           <p class="admin-list-meta">${appeal.message}</p>
-          <p class="admin-list-meta">${summaryLabel}</p>
+          <p class="admin-list-meta">${summaryLabel}${summaryReason ? ` · ${summaryReason}` : ""}</p>
           <p class="admin-list-meta">상태: <span class="badge subtle">${statusLabel}</span>${
         appeal.statusReason ? ` · ${appeal.statusReason}` : ""
       }</p>

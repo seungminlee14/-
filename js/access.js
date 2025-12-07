@@ -430,7 +430,9 @@ export async function createAppeal({ email, punishmentId, message, punishmentSum
     message,
     status: "open",
     statusReason: "",
-    punishmentSummary: punishmentSummary || null,
+    punishmentSummary: punishmentSummary
+      ? { label: punishmentSummary.label, reason: punishmentSummary.reason || "" }
+      : null,
     createdAt: serverTimestamp(),
   });
 }

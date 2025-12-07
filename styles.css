@@ -141,16 +141,26 @@ a { color: inherit; text-decoration: none; }
 }
 
 .notification-item {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 12px;
-  background: rgba(22, 27, 34, 0.6);
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: linear-gradient(160deg, rgba(18, 12, 36, 0.95), rgba(20, 25, 34, 0.95));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
   display: grid;
-  gap: 4px;
+  gap: 6px;
 }
 
-.notification-text { font-weight: 700; }
-.notification-meta { color: var(--muted); font-size: 0.9rem; }
+.notification-text {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.notification-meta {
+  color: var(--muted);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
 .notification-link {
   color: #c7d2fe;
@@ -780,10 +790,11 @@ main { padding: 32px 24px 72px; }
 }
 
 .admin-panel {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.25rem;
-  background: #f9fafb;
+  background: linear-gradient(145deg, rgba(22, 27, 34, 0.9), rgba(16, 20, 28, 0.95));
+  box-shadow: var(--shadow);
 }
 
 .admin-panel h2 {
@@ -817,10 +828,11 @@ main { padding: 32px 24px 72px; }
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid #e5e7eb;
+  padding: 0.95rem 1.1rem;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: white;
+  background: linear-gradient(145deg, rgba(18, 22, 30, 0.95), rgba(15, 19, 26, 0.92));
+  box-shadow: var(--shadow);
 }
 
 .admin-list-title {

@@ -96,9 +96,11 @@ const renderAppeals = (appeals) => {
         : appeal.status === "onHold"
         ? "처리 보류"
         : "대기";
+    const summaryLabel = appeal.punishmentSummary?.label || "최근 처벌";
+    const summaryReason = appeal.punishmentSummary?.reason || "";
     item.innerHTML = `
       <div>
-        <div class="admin-list-title">${appeal.punishmentSummary?.label || "최근 처벌"}</div>
+        <div class="admin-list-title">${summaryLabel}${summaryReason ? ` · ${summaryReason}` : ""}</div>
         <p class="admin-list-meta">${appeal.message}</p>
         <p class="admin-list-meta">상태: <span class="badge subtle">${statusLabel}</span>${
       appeal.statusReason ? ` · ${appeal.statusReason}` : ""
@@ -129,7 +131,13 @@ const handleAppeal = (email) => {
             selected.createdAt ? formatDate(selected.createdAt) : "시간 미확인"
           }`
         : "최근 처벌";
-      await createAppeal({ email, punishmentId: appealTarget.value, message, punishmentSummary: { label } });
+      const summaryReason = selected?.reason ? selected.reason : "";
+      await createAppeal({
+        email,
+        punishmentId: appealTarget.value,
+        message,
+        punishmentSummary: { label, reason: summaryReason },
+      });
       setStatus(appealFormStatus, "제출되었습니다. 관리자 검토를 기다려주세요.", "success");
       appealForm.reset();
       await loadAppealHistory(email);
