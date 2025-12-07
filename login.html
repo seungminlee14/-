@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>다츠 게임즈 | 로그인</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script type="module" src="/js/ban-guard.js" defer></script>
+  <script type="module" src="/js/nav.js" defer></script>
+  <script type="module" src="/js/firebase.js"></script>
+  <script type="module" src="/js/forms.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a href="/" class="logo">다츠 게임즈</a>
+    <div class="nav-right">
+      <nav class="nav-links">
+        <a href="/" class="nav-link">홈</a>
+        <a href="/community" class="nav-link">커뮤니티</a>
+      </nav>
+      <div class="profile-menu">
+        <button class="profile-trigger" type="button" aria-expanded="false">
+          <span class="profile-avatar" aria-hidden="true">미</span>
+          <span class="profile-name">미로그인</span>
+          <span class="profile-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="profile-dropdown" hidden>
+          <a class="profile-action" href="/login">로그인</a>
+          <a class="profile-action" href="/signup">회원가입</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="form-page">
+    <section class="form-card">
+      <p class="eyebrow">로그인</p>
+      <h1>다시 만나 반가워요</h1>
+      <p class="lede">아이디(또는 이메일)와 비밀번호로 로그인하세요.</p>
+      <form id="login-form" class="auth-form">
+        <label class="form-field">
+          <span>아이디 / 이메일</span>
+          <input type="text" name="username" placeholder="your@email.com" required />
+        </label>
+        <label class="form-field">
+          <span>비밀번호</span>
+          <input type="password" name="password" placeholder="••••••••" required />
+        </label>
+        <button class="button primary" type="submit">로그인</button>
+        <p class="form-helper">
+          아직 계정이 없나요? <a href="/signup">회원가입</a>
+        </p>
+      </form>
+      <div id="login-status" class="form-status" role="status" aria-live="polite"></div>
+      <div class="divider" role="presentation">또는</div>
+      <div class="social-login">
+        <p class="social-caption">다른 계정으로 로그인</p>
+        <div class="social-actions">
+          <button class="button secondary" type="button" data-social-login="google">Google로 로그인</button>
+          <button class="button secondary" type="button" data-social-login="microsoft">Microsoft로 로그인</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
