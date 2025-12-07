@@ -293,6 +293,17 @@ main { padding: 32px 24px 72px; }
   box-shadow: var(--shadow);
 }
 
+.button.secondary {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.button.secondary:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 .button.ghost:hover { background: var(--border); }
 .button:active { transform: translateY(1px); }
 
