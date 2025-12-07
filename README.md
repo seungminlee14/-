@@ -9,6 +9,10 @@
 ### 커스텀 도메인에서 인증이 안 될 때
 - Firebase 콘솔 > Authentication > Settings에서 `Authorized domains`에 커스텀 도메인을 추가하세요.
 - 추가하지 않으면 `auth/unauthorized-domain` 오류로 로그인·회원가입이 차단됩니다. UI에서 안내 문구가 표시됩니다.
+- 오류가 떴을 때 해결 절차
+  1. **Firebase Console → Authentication → Settings → Authorized domains**에 접속합니다.
+  2. **Add domain**을 눌러 서비스 중인 정확한 호스트명을 입력합니다. (예: `example.com`, `preview.example.com`, Firebase Hosting 기본 도메인)
+  3. 저장 후 5~10초 정도 기다렸다가 페이지를 새로고침하고 다시 로그인/회원가입을 시도합니다.
 
 ### Google / Microsoft 소셜 로그인 활성화
 - Firebase 콘솔 > Authentication > Sign-in method에서 **Google**과 **Microsoft** 공급자를 켜고 저장하세요.
