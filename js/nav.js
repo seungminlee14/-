@@ -25,14 +25,24 @@ const renderLinks = (user) => {
 const setAvatar = (user) => {
   if (!profileAvatar) return;
   const fallback = (user?.displayName || user?.email || '미')[0]?.toUpperCase() || '미';
-  if (user?.photoURL) {
-    profileAvatar.style.backgroundImage = `url(${user.photoURL})`;
-    profileAvatar.classList.add('with-photo');
-    profileAvatar.textContent = '';
-  } else {
+
+  const applyFallback = () => {
     profileAvatar.style.backgroundImage = '';
     profileAvatar.classList.remove('with-photo');
     profileAvatar.textContent = fallback;
+  };
+
+  if (user?.photoURL) {
+    const img = new Image();
+    img.onload = () => {
+      profileAvatar.style.backgroundImage = `url(${user.photoURL})`;
+      profileAvatar.classList.add('with-photo');
+      profileAvatar.textContent = '';
+    };
+    img.onerror = applyFallback;
+    img.src = user.photoURL;
+  } else {
+    applyFallback();
   }
 };
 

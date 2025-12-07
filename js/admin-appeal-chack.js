@@ -1,6 +1,8 @@
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { auth } from "./firebase.js";
-import { fetchPendingAppeals, isAdminEmail, updateAppealStatus } from "./access.js";
+import * as accessApi from "./access.js";
+
+const { fetchPendingAppeals, isAdminEmail, updateAppealStatus } = accessApi;
 
 const guard = document.getElementById("appealAdminGuard");
 const content = document.getElementById("appealAdminContent");
