@@ -355,6 +355,23 @@ export const acknowledgePunishment = async (id) => {
   await updateDoc(doc(punishmentsRef, id), { acknowledged: true, acknowledgedAt: serverTimestamp() });
 };
 
+const revokePunishmentById = async (id) => {
+  if (!id) return null;
+  const snap = await getDoc(doc(punishmentsRef, id));
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  await updateDoc(doc(punishmentsRef, id), { revoked: true, acknowledged: true, resolvedAt: serverTimestamp() });
+
+  if (data.type === "suspension" && data.emailLower) {
+    try {
+      await clearBan(data.emailLower);
+    } catch (error) {
+      console.error("정지 해제 실패", error);
+    }
+  }
+  return { id, ...data };
+};
+
 export const fetchPendingPunishment = async (email) => {
   const normalized = normalizeEmail(email);
   if (!normalized) return null;
@@ -451,9 +468,33 @@ export const fetchAppeals = async () => {
   });
 };
 
-export const updateAppealStatus = async ({ id, status, reason }) => {
+export const fetchPendingAppeals = async () => {
+  const q = query(appealsRef, orderBy("createdAt", "asc"));
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate() : null,
+      };
+    })
+    .filter((appeal) => appeal.status === "open" || appeal.status === "onHold");
+};
+
+export const updateAppealStatus = async ({ id, status, reason, revoke }) => {
   if (!id) return;
   const trimmed = (reason || "").trim();
-  if (!trimmed || trimmed.length < 5) throw new Error("사유를 5글자 이상 입력하세요.");
+  if (!trimmed || trimmed.length < 15) throw new Error("사유를 15글자 이상 입력하세요.");
+
   await updateDoc(doc(appealsRef, id), { status, statusReason: trimmed, resolvedAt: serverTimestamp() });
+
+  if (status === "approved" && revoke) {
+    const snap = await getDoc(doc(appealsRef, id));
+    const data = snap.data();
+    if (data?.punishmentId) {
+      await revokePunishmentById(data.punishmentId);
+    }
+  }
 };

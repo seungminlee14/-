@@ -62,11 +62,6 @@ service cloud.firestore {
       allow write: if request.auth != null; // 콘솔에서 관리자만 쓰도록 제어하세요.
     }
 
-    // 알림
-    match /notifications/{notificationId} {
-      allow read: if true;
-      allow write: if request.auth != null && request.auth.token.email == 'seungminlee14@naver.com';
-    }
   }
 }
 ```
@@ -90,7 +85,6 @@ service firebase.storage {
 ## 관리자 / 차단 안내
 - `/admin` 페이지는 `seungminlee14@naver.com` 등 관리자 계정만 접근합니다.
 - 관리자 페이지에서 게시물 번호로 글을 삭제하거나, 이메일 기준으로 계정을 정지/해제할 수 있습니다. 정지/해제 내역은 관리자가 확인할 수 있도록 로그가 남습니다.
-- 관리자 페이지에서 사이트 전체에 노출되는 알림을 작성/전송할 수 있으며, 상단 헤더의 알림 드롭다운에서 사용자에게 표시됩니다.
 - 정지된 계정은 로그인 시 `/banned`로 이동하며, 사유와 해제 예정일(설정한 경우)이 표시됩니다.
 - 소유자 계정(`seungminlee14@naver.com`)은 삭제/정지할 수 없습니다.
-- 위 Firestore 규칙 예시에 `bans`, `banLogs`, `notifications`가 포함되어 있으니 콘솔이나 `firebase deploy --only firestore:rules`로 배포하세요.
+- 위 Firestore 규칙 예시에 `bans`, `banLogs`가 포함되어 있으니 콘솔이나 `firebase deploy --only firestore:rules`로 배포하세요.

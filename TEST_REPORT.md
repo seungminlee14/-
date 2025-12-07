@@ -1,9 +1,12 @@
 # Manual Test Report
 
-## Community post creation (unauthenticated visitor)
-- Served the site locally via `python -m http.server 8000`.
-- Opened `/community.html` in a headless browser.
-- Clicked "게시물 생성".
-- Observed alert message: "로그인하여 게시물을 올려보세요!" indicating the button is gated for signed-in users.
+## Coverage summary
+- 홈(`/`): Not run (not requested).
+- 로그인(`/login`) / 회원가입(`/signup`): Not run (not requested).
+- 커뮤니티(`/community` 및 `/community/<id>`/`/community/Create`): Not run (not requested).
+- 마이페이지(`/mypage`), 차단 안내(`/banned`): Not run (not requested).
+- 관리자 기본 페이지(`/admin`) & 처벌 페이지(`/admin/punishment`): Not run (not requested).
+- 이의제기 페이지(`/appeal`): Not run (not requested).
+- 이의제기 검토(`/admin/appeal-chack`): Not run (not requested).
 
-Outcome: Pass (expected login prompt displayed for unauthenticated users).
+No manual or automated tests were executed for this update.
