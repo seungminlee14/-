@@ -10,6 +10,11 @@
 - Firebase 콘솔 > Authentication > Settings에서 `Authorized domains`에 커스텀 도메인을 추가하세요.
 - 추가하지 않으면 `auth/unauthorized-domain` 오류로 로그인·회원가입이 차단됩니다. UI에서 안내 문구가 표시됩니다.
 
+### Google / Microsoft 소셜 로그인 활성화
+- Firebase 콘솔 > Authentication > Sign-in method에서 **Google**과 **Microsoft** 공급자를 켜고 저장하세요.
+- Microsoft는 콘솔에 안내된 리디렉션 URL(`/__/auth/handler`)을 애플리케이션에 등록해야 합니다.
+- 저장소의 로그인 화면에는 두 공급자 버튼이 준비되어 있으며, 콘솔에서 활성화만 하면 바로 동작합니다.
+
 ## Firestore 규칙 설정 (데이터베이스)
 - Firebase 콘솔 > Firestore Database > Rules에서 아래 규칙을 붙여넣고 **게시**하세요.
 - 동일한 내용을 저장소의 `firestore.rules`에도 포함시켜 `firebase deploy --only firestore:rules`로 배포할 수 있습니다.

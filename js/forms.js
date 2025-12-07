@@ -2,6 +2,9 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { auth } from "./firebase.js";
 
@@ -12,6 +15,52 @@ const showStatus = (id, message, tone = "info") => {
   if (!target) return;
   target.textContent = message;
   target.dataset.tone = tone;
+};
+
+const getSocialProvider = (type) => {
+  if (type === "google") {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    return provider;
+  }
+  if (type === "microsoft") {
+    const provider = new OAuthProvider("microsoft.com");
+    provider.setCustomParameters({ prompt: "select_account" });
+    provider.addScope("User.Read");
+    return provider;
+  }
+  return null;
+};
+
+const bindSocialLogins = () => {
+  const buttons = document.querySelectorAll('[data-social-login]');
+  if (!buttons.length) return;
+
+  buttons.forEach((button) => {
+    button.addEventListener("click", async () => {
+      const providerType = button.dataset.socialLogin;
+      const provider = getSocialProvider(providerType);
+      if (!provider) return;
+
+      showStatus("login", `${button.textContent.trim()} 진행 중입니다...`);
+
+      try {
+        await signInWithPopup(auth, provider);
+        showStatus("login", "로그인에 성공했습니다! 곧 메인 화면으로 이동합니다.", "success");
+        setTimeout(() => (window.location.href = "/"), 800);
+      } catch (error) {
+        let message = "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.";
+        if (error.code === "auth/popup-closed-by-user") {
+          message = "팝업이 닫혔습니다. 다시 시도해주세요.";
+        } else if (error.code === "auth/cancelled-popup-request") {
+          message = "다른 로그인 시도가 감지되어 취소되었습니다. 다시 시도해주세요.";
+        } else if (error.code === "auth/unauthorized-domain") {
+          message = "현재 도메인에서는 인증이 허용되지 않습니다. Firebase 콘솔 > 인증 > 허용 도메인에 이 주소를 추가해주세요.";
+        }
+        showStatus("login", message, "error");
+      }
+    });
+  });
 };
 
 const loginForm = document.querySelector('#login-form');
@@ -48,6 +97,9 @@ if (loginForm) {
     }
   });
 }
+
+// 소셜 로그인 버튼 연결
+bindSocialLogins();
 
 const signupForm = document.querySelector('#signup-form');
 if (signupForm) {
